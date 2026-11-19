@@ -1,0 +1,197 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>Margem de Cena — Artigo</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&amp;family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&amp;family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:inherit}a:hover{opacity:.8}
+</style>
+</helmet>
+<div style="background: {{t.bg}}; color: {{t.fg}}; font-family: 'Inter', sans-serif; min-height: 100vh">
+
+  <header style="border-bottom: 1px solid {{t.fg}}">
+    <div style="max-width: 1240px; margin: 0 auto; padding: 16px 32px; display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap">
+      <a href="Home.dc.html" aria-label="Margem de Cena — página inicial" style="text-decoration: none; display: flex; align-items: stretch; gap: 10px">
+        <span style="width: 2px; background: {{t.accent}}"></span>
+        <span style="font-family: 'Cormorant Garamond', serif; font-weight: 500; font-size: 28px; line-height: 1">Margem <span style="font-style: italic; font-weight: 400; color: {{t.accent}}">de</span> Cena</span>
+      </a>
+      <nav aria-label="Seções" style="display: flex; gap: 22px; flex-wrap: wrap; font-size: 12px; letter-spacing: 0.12em; text-transform: uppercase; font-weight: 500">
+        <a href="#" style="text-decoration: none">Filmes</a>
+        <a href="#" style="text-decoration: none">Livros</a>
+        <a href="#" style="text-decoration: none">Séries</a>
+        <a href="#" style="text-decoration: none">Duas Leituras</a>
+        <a href="#" style="text-decoration: none">Ensaios</a>
+        <a href="#" style="text-decoration: none">Sobre</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <article>
+      <header style="max-width: 920px; margin: 0 auto; padding: 72px 32px 40px; display: flex; flex-direction: column; gap: 22px; align-items: center; text-align: center">
+        <p style="margin: 0; font-size: 11px; letter-spacing: 0.18em; text-transform: uppercase; font-weight: 600; color: {{t.accent}}">Filmes · Duas Leituras</p>
+        <h1 style="margin: 0; font-family: 'Cormorant Garamond', serif; font-weight: 500; font-size: 84px; line-height: 0.92; letter-spacing: -0.02em">A maré que não volta</h1>
+        <p style="margin: 0; max-width: 640px; font-family: 'Cormorant Garamond', serif; font-style: italic; font-size: 26px; line-height: 1.3; color: {{t.soft}}">Sobre casas que guardam ausências, planos que esperam demais e o tempo que uma imagem leva para se tornar memória.</p>
+        <div style="display: flex; flex-wrap: wrap; justify-content: center; gap: 8px 20px; font-size: 13px; color: {{t.muted}}; padding-top: 8px">
+          <a href="#" style="color: {{t.fg}}; font-weight: 500; text-decoration: none">Por Filipe Braga</a>
+          <span>12 de novembro de 2026</span>
+          <span>11 min de leitura</span>
+        </div>
+      </header>
+
+      <figure style="max-width: 1240px; margin: 0 auto; padding: 0 32px; display: flex; flex-direction: column; gap: 10px">
+        <div style="aspect-ratio: 21 / 9; background: {{t.line}}; position: relative">
+          <span style="position: absolute; top: -8px; left: -8px; width: 24px; height: 24px; border-top: 1px solid {{t.fg}}; border-left: 1px solid {{t.fg}}"></span>
+          <span style="position: absolute; bottom: -8px; right: -8px; width: 24px; height: 24px; border-bottom: 1px solid {{t.fg}}; border-right: 1px solid {{t.fg}}"></span>
+        </div>
+        <figcaption style="font-size: 12px; color: {{t.muted}}">Imagem de capa · placeholder 21:9 · [créditos e licença da imagem]</figcaption>
+      </figure>
+
+      <div style="max-width: 1240px; margin: 0 auto; padding: 56px 32px 0; display: flex; flex-wrap: wrap; gap: 40px 56px; justify-content: center">
+        <aside aria-label="Ficha da obra" style="flex: 0 1 200px; display: flex; flex-direction: column; gap: 14px; font-size: 13px; line-height: 1.5; border-top: 1px solid {{t.fg}}; padding-top: 14px; align-self: flex-start">
+          <p style="margin: 0; font-family: 'Cormorant Garamond', serif; font-style: italic; font-size: 20px; color: {{t.accent}}">A obra</p>
+          <div><p style="margin: 0; color: {{t.muted}}; font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase">Título</p><p style="margin: 2px 0 0">A casa das marés</p></div>
+          <div><p style="margin: 0; color: {{t.muted}}; font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase">Direção</p><p style="margin: 2px 0 0">[Nome fictício]</p></div>
+          <div><p style="margin: 0; color: {{t.muted}}; font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase">Ano</p><p style="margin: 2px 0 0">2025</p></div>
+          <div><p style="margin: 0; color: {{t.muted}}; font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase">Spoilers</p><p style="margin: 2px 0 0">Sim, sinalizados no texto</p></div>
+        </aside>
+
+        <div style="flex: 0 1 680px; min-width: 0; font-family: 'Source Serif 4', serif; font-size: 20px; line-height: 1.72; display: flex; flex-direction: column; gap: 28px">
+          <p style="margin: 0"><span style="float: left; font-family: 'Cormorant Garamond', serif; font-size: 92px; line-height: 0.78; padding: 8px 10px 0 0; color: {{t.accent}}">H</span>á filmes que terminam quando a tela escurece, e há outros que apenas mudam de lugar. A casa das marés pertence ao segundo grupo: sua última imagem não encerra nada, apenas transfere para quem assiste a tarefa de continuar olhando.</p>
+          <p style="margin: 0">O que me interessa aqui não é o enredo, que cabe em duas linhas, mas a maneira como a casa é filmada. Cada cômodo surge sempre pelo mesmo ângulo, como se a câmera fosse uma moradora antiga, <span style="background: linear-gradient(transparent 60%, {{t.hl}} 60%)">alguém que já sabe onde a luz bate em cada hora do dia</span>.</p>
+
+          <h2 style="margin: 16px 0 0; font-family: 'Cormorant Garamond', serif; font-weight: 500; font-size: 40px; line-height: 1.05">A casa como personagem</h2>
+          <p style="margin: 0">A escolha de enquadramentos fixos transforma o espaço em memória. Quando a personagem deixa de aparecer nos planos, a ausência não precisa ser anunciada: a moldura continua lá, esperando.<sup style="font-family: 'Inter', sans-serif; font-size: 11px; color: {{t.accent}}">1</sup></p>
+
+          <blockquote style="margin: 8px 0; padding: 4px 0 4px 28px; border-left: 2px solid {{t.accent}}; font-family: 'Cormorant Garamond', serif; font-style: italic; font-size: 34px; line-height: 1.2">Uma casa vazia filmada com paciência é uma frase que se recusa a terminar.</blockquote>
+
+          <div style="border-top: 1px solid {{t.accent}}; border-bottom: 1px solid {{t.accent}}; padding: 18px 0; display: flex; flex-direction: column; gap: 16px">
+            <div style="display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap">
+              <div style="display: flex; flex-direction: column; gap: 4px">
+                <p style="margin: 0; font-family: 'Inter', sans-serif; font-size: 11px; letter-spacing: 0.16em; text-transform: uppercase; font-weight: 600; color: {{t.accent}}">Atenção: spoiler</p>
+                <p style="margin: 0; font-family: 'Inter', sans-serif; font-size: 14px; color: {{t.soft}}">O próximo trecho comenta o plano final do filme.</p>
+              </div>
+              <button type="button" onClick="{{toggle}}" aria-expanded="{{revealed}}" style="min-height: 44px; padding: 0 18px; background: transparent; border: 1px solid {{t.accent}}; color: {{t.accent}}; font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 500; cursor: pointer">{{toggleLabel}}</button>
+            </div>
+            <sc-if value="{{revealed}}" hint-placeholder-val="{{ false }}">
+              <p style="margin: 0">No último plano, a câmera volta à cozinha da primeira cena. A mesa está posta para uma pessoa só, e é essa simetria, mais do que qualquer diálogo, que fecha o luto do filme.</p>
+            </sc-if>
+            <sc-if value="{{hidden}}" hint-placeholder-val="{{ true }}">
+              <div aria-hidden="true" style="display: flex; flex-direction: column; gap: 10px">
+                <div style="height: 12px; background: {{t.line}}; width: 100%"></div>
+                <div style="height: 12px; background: {{t.line}}; width: 86%"></div>
+                <div style="height: 12px; background: {{t.line}}; width: 64%"></div>
+              </div>
+            </sc-if>
+          </div>
+
+          <p style="margin: 0">Talvez seja por isso que o filme continue comigo dias depois. Ele não pede que eu entenda a casa; pede que eu aprenda a habitá-la do jeito que ela foi filmada: devagar, e <a href="#" style="color: {{t.accent}}; text-underline-offset: 4px">de um só ponto de vista</a>.</p>
+
+          <p style="margin: 8px 0 0; text-align: center; font-family: 'Cormorant Garamond', serif; font-size: 22px; letter-spacing: 0.6em; color: {{t.accent}}">· · ·</p>
+
+          <div style="display: flex; flex-direction: column; gap: 8px; font-family: 'Inter', sans-serif; font-size: 13px; line-height: 1.6; color: {{t.muted}}; border-top: 1px solid {{t.line}}; padding-top: 18px">
+            <p style="margin: 0; font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; font-weight: 600; color: {{t.fg}}">Notas e referências</p>
+            <p style="margin: 0"><span style="color: {{t.accent}}">1.</span> [Referência bibliográfica ou fonte consultada.]</p>
+          </div>
+
+          <div style="display: flex; flex-wrap: wrap; gap: 8px; font-family: 'Inter', sans-serif">
+            <a href="#" style="font-size: 12px; padding: 6px 10px; border: 1px solid {{t.line}}; text-decoration: none">memória</a>
+            <a href="#" style="font-size: 12px; padding: 6px 10px; border: 1px solid {{t.line}}; text-decoration: none">luto</a>
+            <a href="#" style="font-size: 12px; padding: 6px 10px; border: 1px solid {{t.line}}; text-decoration: none">enquadramento</a>
+          </div>
+
+          <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 4px 8px; font-family: 'Inter', sans-serif; font-size: 13px; border-top: 1px solid {{t.fg}}; border-bottom: 1px solid {{t.fg}}; padding: 6px 0">
+            <span style="color: {{t.muted}}; margin-right: 8px">Compartilhar</span>
+            <a href="#" style="min-height: 44px; display: inline-flex; align-items: center; padding: 0 8px">Copiar link</a>
+            <a href="#" style="min-height: 44px; display: inline-flex; align-items: center; padding: 0 8px">WhatsApp</a>
+            <a href="#" style="min-height: 44px; display: inline-flex; align-items: center; padding: 0 8px">Threads</a>
+            <a href="#" style="min-height: 44px; display: inline-flex; align-items: center; padding: 0 8px">E-mail</a>
+          </div>
+        </div>
+
+        <aside aria-label="Notas de margem" style="flex: 0 1 200px; display: flex; flex-direction: column; gap: 24px; padding-top: 420px">
+          <div style="display: flex; gap: 12px">
+            <div style="width: 1px; background: {{t.accent}}; flex-shrink: 0"></div>
+            <p style="margin: 0; font-family: 'Cormorant Garamond', serif; font-style: italic; font-size: 19px; line-height: 1.3; color: {{t.accent}}"><sup style="font-family: 'Inter', sans-serif; font-style: normal; font-size: 10px">1</sup> Repare na porta entreaberta: ela aparece em quatro planos e nunca é atravessada.</p>
+          </div>
+        </aside>
+      </div>
+
+      <section aria-label="A outra leitura" style="max-width: 1240px; margin: 72px auto 0; padding: 0 32px">
+        <a href="DuasLeituras.dc.html" style="display: flex; flex-wrap: wrap; gap: 24px 48px; align-items: center; background: {{t.band}}; padding: 40px; text-decoration: none">
+          <div style="flex: 1 1 280px; display: flex; flex-direction: column; gap: 6px">
+            <p style="margin: 0; font-size: 11px; letter-spacing: 0.16em; text-transform: uppercase; font-weight: 600; color: {{t.accent}}">Duas Leituras · A casa das marés</p>
+            <p style="margin: 0; font-family: 'Source Serif 4', serif; font-size: 16px; line-height: 1.55; color: {{t.soft}}">Este texto é uma das duas leituras sobre a mesma obra. A outra foi escrita de forma independente.</p>
+          </div>
+          <div style="flex: 2 1 420px; display: flex; flex-direction: column; gap: 6px; border-left: 1px solid {{t.fg}}; padding-left: 32px">
+            <p style="margin: 0; font-family: 'Cormorant Garamond', serif; font-style: italic; font-size: 20px; color: {{t.accent}}">Leia a outra perspectiva</p>
+            <p style="margin: 0; font-family: 'Cormorant Garamond', serif; font-weight: 500; font-size: 38px; line-height: 1">O que a gente deixa nos cômodos</p>
+            <p style="margin: 0; font-size: 13px; color: {{t.muted}}">Adriana Guimarães · 9 min</p>
+          </div>
+        </a>
+      </section>
+
+      <nav aria-label="Artigos anterior e seguinte" style="max-width: 1240px; margin: 0 auto; padding: 56px 32px; display: flex; flex-wrap: wrap; gap: 24px; justify-content: space-between">
+        <a href="#" style="flex: 1 1 320px; text-decoration: none; display: flex; flex-direction: column; gap: 6px; border-top: 1px solid {{t.fg}}; padding-top: 14px">
+          <span style="font-size: 12px; color: {{t.muted}}">← Anterior</span>
+          <span style="font-family: 'Cormorant Garamond', serif; font-size: 28px; font-weight: 500">O labirinto como forma de contar</span>
+        </a>
+        <a href="#" style="flex: 1 1 320px; text-decoration: none; display: flex; flex-direction: column; gap: 6px; border-top: 1px solid {{t.fg}}; padding-top: 14px; text-align: right">
+          <span style="font-size: 12px; color: {{t.muted}}">Próximo →</span>
+          <span style="font-family: 'Cormorant Garamond', serif; font-size: 28px; font-weight: 500">O medo que mora no corredor</span>
+        </a>
+      </nav>
+    </article>
+
+    <section aria-labelledby="rel" style="max-width: 1240px; margin: 0 auto; padding: 0 32px 88px">
+      <h2 id="rel" style="margin: 0 0 28px; font-size: 12px; letter-spacing: 0.16em; text-transform: uppercase; font-weight: 600; border-top: 3px double {{t.fg}}; padding-top: 12px">Leia também</h2>
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 32px">
+        <a href="#" style="text-decoration: none; display: flex; flex-direction: column; gap: 10px">
+          <span style="display: block; aspect-ratio: 3 / 2; background: {{t.line}}"></span>
+          <span style="font-size: 11px; letter-spacing: 0.16em; text-transform: uppercase; font-weight: 600; color: {{t.accent}}">Filmes</span>
+          <span style="font-family: 'Cormorant Garamond', serif; font-size: 26px; font-weight: 500; line-height: 1.05">O medo que mora no corredor</span>
+        </a>
+        <a href="#" style="text-decoration: none; display: flex; flex-direction: column; gap: 10px">
+          <span style="display: block; aspect-ratio: 3 / 2; background: {{t.line}}"></span>
+          <span style="font-size: 11px; letter-spacing: 0.16em; text-transform: uppercase; font-weight: 600; color: {{t.accent}}">Ensaios</span>
+          <span style="font-family: 'Cormorant Garamond', serif; font-size: 26px; font-weight: 500; line-height: 1.05">Monstros que nos explicam</span>
+        </a>
+        <a href="#" style="text-decoration: none; display: flex; flex-direction: column; gap: 10px">
+          <span style="display: block; aspect-ratio: 3 / 2; background: {{t.line}}"></span>
+          <span style="font-size: 11px; letter-spacing: 0.16em; text-transform: uppercase; font-weight: 600; color: {{t.accent}}">Séries</span>
+          <span style="font-family: 'Cormorant Garamond', serif; font-size: 26px; font-weight: 500; line-height: 1.05">O labirinto como forma de contar</span>
+        </a>
+      </div>
+    </section>
+  </main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"escuro":{"editor":"boolean","default":false,"section":"Tema"},"$preview":{"width":1440,"height":3900}}'>
+class Component extends DCLogic {
+  constructor(props) { super(props); this.state = { revealed: false }; }
+  renderVals() {
+    const dark = this.props.escuro ?? false;
+    const t = dark
+      ? { bg: '#1C1B19', fg: '#ECE6DA', soft: '#CFC8BB', muted: '#A39D92', line: '#3A3833', accent: '#D9A9B2', hl: '#4A2A31', band: '#26241F' }
+      : { bg: '#F4F0E8', fg: '#252522', soft: '#3A3935', muted: '#6A665F', line: '#DCD2C3', accent: '#652F3B', hl: '#DCD2C3', band: '#DCD2C3' };
+    const revealed = this.state.revealed;
+    return {
+      t,
+      revealed,
+      hidden: !revealed,
+      toggleLabel: revealed ? 'Ocultar trecho' : 'Revelar trecho',
+      toggle: () => this.setState({ revealed: !revealed })
+    };
+  }
+}
+</script>
+</body>
+</html>

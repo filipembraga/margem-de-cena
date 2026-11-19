@@ -1,0 +1,31 @@
+# Dependencies
+node_modules/
+
+# Next.js
+.next/
+out/
+next-env.d.ts
+
+# Build and type-check output
+*.tsbuildinfo
+
+# Tests
+coverage/
+playwright-report/
+test-results/
+blob-report/
+playwright/.cache/
+
+# Environment (examples are committed, real values never are)
+.env*
+!.env.example
+
+# Vercel
+.vercel/
+
+# Local tooling settings (shared settings in .claude/settings.json are committed)
+.claude/settings.local.json
+
+# OS and editor
+.DS_Store
+*.log
