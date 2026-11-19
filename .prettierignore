@@ -1,0 +1,14 @@
+pnpm-lock.yaml
+.next/
+out/
+coverage/
+playwright-report/
+test-results/
+next-env.d.ts
+
+# Hand-written documentation and exported design files keep their own formatting.
+*.md
+docs/design/
+
+# Tool settings managed outside this project.
+.claude/
