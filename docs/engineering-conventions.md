@@ -15,8 +15,9 @@ review.
   `x`, `items`, `data`.
 - No abbreviations except universally understood ones (`id`, `url`, `html`, `seo`, `og`).
   `formatLongDate`, not `fmtDate`; `readingTimeInMinutes`, not `rtMin`.
-- Short names such as `index` are fine only in short loops. Callback parameters get real
-  names: `articles.map((article) => ...)`, not `articles.map((a) => ...)`.
+- Callback parameters get real names: `articles.map((article) => ...)`, not
+  `articles.map((a) => ...)`. ESLint rejects one-letter identifiers; `_` marks an unused
+  parameter.
 - Booleans read as yes/no questions: `isRevealed`, `hasCover`, `shouldShowDemoBanner`.
 - Event handlers: the prop is `onReveal` and the local handler is `handleRevealClick`.
 - Functions start with a verb: `getArticle`, `formatShortDate`, `buildSitemapEntries`,
@@ -31,8 +32,9 @@ review.
 
 ## Types and functions
 
-- Exported functions declare their parameter and return types explicitly. Inside a function,
-  let inference do its job.
+- Exported functions in `src/lib` and `src/content` declare their parameter and return types
+  explicitly (enforced by ESLint). React components declare a props type; their return type is
+  inferred. Inside a function, let inference do its job.
 - Prefer named, small types over inline anonymous ones at module boundaries:
   `type ArticleSummary = ...`, then `getPublishedArticles(): Promise<ArticleSummary[]>`.
 - Use `type` for data shapes and unions, and `interface` for contracts that something
