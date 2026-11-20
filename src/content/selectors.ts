@@ -61,6 +61,78 @@ export function selectFeaturedArticle(catalog: ContentCatalog): ArticleSummary |
   return featuredArticle ? toSummary(featuredArticle) : null;
 }
 
+export type AdjacentArticles = {
+  /** Published just before this one (older). */
+  previous: ArticleSummary | null;
+  /** Published just after this one (newer). */
+  next: ArticleSummary | null;
+};
+
+/** The neighbours of an article in publication order, across all categories. */
+export function selectAdjacentArticles(catalog: ContentCatalog, slug: string): AdjacentArticles {
+  // Articles are sorted most recent first, so the older neighbour comes after in the list.
+  const index = catalog.articles.findIndex((article) => article.slug === slug);
+  if (index === -1) {
+    return { previous: null, next: null };
+  }
+
+  const previousArticle = catalog.articles[index + 1];
+  const nextArticle = index > 0 ? catalog.articles[index - 1] : undefined;
+  return {
+    previous: previousArticle ? toSummary(previousArticle) : null,
+    next: nextArticle ? toSummary(nextArticle) : null,
+  };
+}
+
+/** How much each kind of affinity counts when choosing related articles. */
+const RELATEDNESS_WEIGHTS = {
+  sameWork: 4,
+  sharedTag: 2,
+  sameCategory: 1,
+} as const;
+
+function scoreRelatedness(article: Article, candidate: Article): number {
+  const tagSlugs = new Set(article.tags.map((tag) => tag.slug));
+  const sharedTagCount = candidate.tags.filter((tag) => tagSlugs.has(tag.slug)).length;
+  const isSameWork = article.work !== null && candidate.work?.slug === article.work.slug;
+
+  return (
+    (isSameWork ? RELATEDNESS_WEIGHTS.sameWork : 0) +
+    sharedTagCount * RELATEDNESS_WEIGHTS.sharedTag +
+    (candidate.category === article.category ? RELATEDNESS_WEIGHTS.sameCategory : 0)
+  );
+}
+
+/**
+ * "Leia também": the articles closest to this one (same work, shared tags, same category),
+ * filled with the most recent ones when few are related. The companion text of a Duas
+ * Leituras entry is left out, since the article already links to it.
+ */
+export function selectRelatedArticles(
+  catalog: ContentCatalog,
+  slug: string,
+  limit: number,
+): ArticleSummary[] {
+  const article = catalog.articles.find((candidate) => candidate.slug === slug);
+  if (!article) {
+    return [];
+  }
+
+  const candidates = catalog.articles.filter(
+    (candidate) =>
+      candidate.slug !== article.slug &&
+      (article.twoPerspectivesSlug === null ||
+        candidate.twoPerspectivesSlug !== article.twoPerspectivesSlug),
+  );
+
+  // Candidates are already most recent first, and the sort is stable, so ties keep that order.
+  return candidates
+    .map((candidate) => ({ candidate, score: scoreRelatedness(article, candidate) }))
+    .sort((first, second) => second.score - first.score)
+    .slice(0, limit)
+    .map(({ candidate }) => toSummary(candidate));
+}
+
 /** Sections with at least one visible entry. Empty sections are hidden everywhere. */
 export function selectSectionsWithContent(catalog: ContentCatalog): Set<Section> {
   const sections = new Set<Section>(catalog.articles.map((article) => article.category));
