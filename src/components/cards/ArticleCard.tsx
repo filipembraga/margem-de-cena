@@ -30,8 +30,9 @@ type ArticleCardProps = {
    * `compact`: title and meta under a hairline (lists inside a category block).
    * `featured`: the home page hero, large cover with crop marks beside the text.
    * `numbered`: an essay row with an italic numeral (requires `position`).
+   * `brief`: cover, kicker and title only ("Leia também" at the end of an article).
    */
-  variant?: 'default' | 'compact' | 'featured' | 'numbered';
+  variant?: 'default' | 'compact' | 'featured' | 'numbered' | 'brief';
   headingLevel?: HeadingLevel;
   /** 1-based position, shown as "01", "02" in the numbered variant. */
   position?: number;
@@ -50,6 +51,8 @@ export function ArticleCard({
       return <CompactCard article={article} headingLevel={headingLevel} />;
     case 'numbered':
       return <NumberedCard article={article} headingLevel={headingLevel} position={position} />;
+    case 'brief':
+      return <BriefCard article={article} headingLevel={headingLevel} />;
     default:
       return <DefaultCard article={article} headingLevel={headingLevel} />;
   }
@@ -84,6 +87,18 @@ function DefaultCard({ article, headingLevel: Heading }: CardVariantProps) {
         dateStyle="day-and-month"
         size="small"
       />
+    </article>
+  );
+}
+
+function BriefCard({ article, headingLevel: Heading }: CardVariantProps) {
+  return (
+    <article className="flex flex-col gap-2.5">
+      <Cover source={article.cover} aspectRatio="3:2" />
+      <Kicker>{article.kicker}</Kicker>
+      <Heading className="type-card-title">
+        <TitleLink article={article} />
+      </Heading>
     </article>
   );
 }

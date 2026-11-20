@@ -4,12 +4,16 @@ import { DemoLabel } from '@/components/ui/DemoLabel';
 import { Kicker } from '@/components/ui/Kicker';
 import type { ArticleSummary } from '@/content';
 import { getCategoryDefinition } from '@/lib/categories';
+import { formatLongDate, toDateTimeAttribute } from '@/lib/dates';
 
 type ArticleHeaderProps = {
   article: ArticleSummary;
 };
 
-/** Centered header: kicker, title, standfirst, byline with date and reading time. */
+/**
+ * Centered header: kicker, title, standfirst, byline with date and reading time, the date of
+ * the last relevant revision when there is one, and the spoiler notice.
+ */
 export function ArticleHeader({ article }: ArticleHeaderProps) {
   const categoryLabel = getCategoryDefinition(article.category).pluralLabel;
   const kicker = article.twoPerspectivesSlug ? `${categoryLabel} · Duas Leituras` : categoryLabel;
@@ -31,6 +35,14 @@ export function ArticleHeader({ article }: ArticleHeaderProps) {
         withReadingLabel
         className="pt-2"
       />
+      {article.updatedAt && (
+        <p className="-mt-3 type-meta-small text-muted">
+          Atualizado em{' '}
+          <time dateTime={toDateTimeAttribute(article.updatedAt)}>
+            {formatLongDate(article.updatedAt)}
+          </time>
+        </p>
+      )}
       {article.hasSpoilerWarning && (
         <p className="border-y border-accent px-1 py-2 type-meta text-accent">
           Este texto comenta pontos da trama. Os trechos com spoiler estão sinalizados.

@@ -4,12 +4,26 @@ import { notFound } from 'next/navigation';
 import { ArticleEndMatter } from '@/components/article/ArticleEndMatter';
 import { ArticleHeader } from '@/components/article/ArticleHeader';
 import { CompanionLink } from '@/components/article/CompanionLink';
+import { PrevNext } from '@/components/article/PrevNext';
+import { RelatedArticles } from '@/components/article/RelatedArticles';
+import { ShareBar } from '@/components/article/ShareBar';
 import { WorkInfo } from '@/components/article/WorkInfo';
 import { getArticleCoverSource } from '@/components/cards/article-card-data';
 import { ArticleBody } from '@/components/mdx/ArticleBody';
+import { JsonLd } from '@/components/seo/JsonLd';
+import { buildArticleStructuredData } from '@/components/seo/structured-data';
 import { Cover } from '@/components/ui/Cover';
-import { getArticle, getPublishedArticles, getTwoPerspectives, type Article } from '@/content';
+import {
+  getAdjacentArticles,
+  getArticle,
+  getPublishedArticles,
+  getRelatedArticles,
+  getTwoPerspectives,
+  type Article,
+} from '@/content';
 import { findCategoryBySlug, getCategoryDefinition } from '@/lib/categories';
+import { environment } from '@/lib/env';
+import { buildPageMetadata, toAbsoluteUrl } from '@/lib/seo';
 
 type ArticlePageProps = {
   params: Promise<{ category: string; slug: string }>;
@@ -39,38 +53,59 @@ async function readArticle(params: ArticlePageProps['params']): Promise<Article>
 
 export async function generateMetadata({ params }: ArticlePageProps): Promise<Metadata> {
   const article = await readArticle(params);
-  return { title: article.title, description: article.excerpt };
+  return buildPageMetadata({
+    title: article.title,
+    description: article.excerpt,
+    path: article.path,
+    hasOwnShareImage: true,
+    article: {
+      publishedTime: article.publishedAt,
+      modifiedTime: article.updatedAt,
+      authorPaths: article.authors.map((author) => author.path),
+      section: getCategoryDefinition(article.category).pluralLabel,
+      tags: article.tags.map((tag) => tag.name),
+    },
+  });
 }
 
 export default async function ArticlePage({ params }: ArticlePageProps) {
   const article = await readArticle(params);
-  const twoPerspectives = article.twoPerspectivesSlug
-    ? await getTwoPerspectives(article.twoPerspectivesSlug)
-    : null;
+  const [twoPerspectives, adjacentArticles, relatedArticles] = await Promise.all([
+    article.twoPerspectivesSlug ? getTwoPerspectives(article.twoPerspectivesSlug) : null,
+    getAdjacentArticles(article.slug),
+    getRelatedArticles(article.slug),
+  ]);
 
   return (
-    <article className="pb-22">
-      <ArticleHeader article={article} />
-      <ArticleCover article={article} />
+    <div className="pb-22">
+      <JsonLd data={buildArticleStructuredData(article, environment.siteUrl)} />
+      <article>
+        <ArticleHeader article={article} />
+        <ArticleCover article={article} />
 
-      <div className="page-container grid justify-center gap-x-14 gap-y-8 pt-10 lg:grid-cols-[12.5rem_minmax(0,42.5rem)_12.5rem] lg:pt-14">
-        <div>
-          {article.work && (
-            <WorkInfo work={article.work} hasSpoilerWarning={article.hasSpoilerWarning} />
-          )}
+        <div className="page-container grid justify-center gap-x-14 gap-y-8 pt-10 lg:grid-cols-[12.5rem_minmax(0,42.5rem)_12.5rem] lg:pt-14">
+          <div>
+            {article.work && (
+              <WorkInfo work={article.work} hasSpoilerWarning={article.hasSpoilerWarning} />
+            )}
+          </div>
+          <div className="flex min-w-0 flex-col gap-10">
+            <ArticleBody body={article.body} withDropCap />
+            <ArticleEndMatter references={article.references} tags={article.tags} />
+            <ShareBar url={toAbsoluteUrl(article.path)} title={article.title} />
+          </div>
+          {/* The right column is the margin where notes are placed on wide screens. */}
+          <div aria-hidden="true" className="hidden lg:block" />
         </div>
-        <div className="flex min-w-0 flex-col gap-10">
-          <ArticleBody body={article.body} withDropCap />
-          <ArticleEndMatter references={article.references} tags={article.tags} />
-        </div>
-        {/* The right column is the margin where notes are placed on wide screens. */}
-        <div aria-hidden="true" className="hidden lg:block" />
-      </div>
 
-      {twoPerspectives && (
-        <CompanionLink entry={twoPerspectives} currentArticleSlug={article.slug} />
-      )}
-    </article>
+        {twoPerspectives && (
+          <CompanionLink entry={twoPerspectives} currentArticleSlug={article.slug} />
+        )}
+      </article>
+
+      <PrevNext {...adjacentArticles} />
+      <RelatedArticles articles={relatedArticles} />
+    </div>
   );
 }
 
