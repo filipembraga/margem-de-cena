@@ -6,8 +6,10 @@ playwright-report/
 test-results/
 next-env.d.ts
 
-# Hand-written documentation and exported design files keep their own formatting.
+# Hand-written documentation, the authors' content and exported design files keep their own
+# formatting: a text must never fail CI because of Markdown style.
 *.md
+content/
 docs/design/
 
 # Tool settings managed outside this project.
