@@ -1,3 +1,4 @@
+import { Search } from 'lucide-react';
 import Link from 'next/link';
 
 import { InstagramIcon } from '@/components/ui/InstagramIcon';
@@ -27,9 +28,6 @@ type SiteHeaderProps = {
 const ICON_BUTTON_CLASS_NAMES =
   'inline-flex size-11 items-center justify-center text-fg hover:text-accent';
 
-/**
- * Search (/busca) arrives in Stage 4; its icon button returns to the header with it.
- */
 export async function SiteHeader({ variant }: SiteHeaderProps) {
   const instagramUrl = siteConfig.instagramHandle
     ? getInstagramUrl(siteConfig.instagramHandle)
@@ -61,6 +59,14 @@ function HomeLink({ size }: { size: 'header' | 'compact' }) {
   );
 }
 
+function SearchLink() {
+  return (
+    <Link href="/busca" aria-label="Buscar" className={ICON_BUTTON_CLASS_NAMES}>
+      <Search aria-hidden="true" size={20} strokeWidth={1.6} />
+    </Link>
+  );
+}
+
 function InstagramLink({ url }: { url: string }) {
   return (
     <a
@@ -79,7 +85,10 @@ function MobileBar({ items, instagramUrl }: HeaderPartProps) {
   return (
     <div className="flex items-center justify-between py-2 pr-3 pl-5 lg:hidden">
       <HomeLink size="compact" />
-      <MobileMenu items={items} instagramUrl={instagramUrl} />
+      <div className="flex">
+        <SearchLink />
+        <MobileMenu items={items} instagramUrl={instagramUrl} />
+      </div>
     </div>
   );
 }
@@ -91,6 +100,7 @@ function FullDesktopHeader({ items, instagramUrl }: HeaderPartProps) {
         <HomeLink size="header" />
         <p className="font-display text-xl text-muted italic">{siteConfig.tagline}</p>
         <div className="flex gap-1">
+          <SearchLink />
           {instagramUrl && <InstagramLink url={instagramUrl} />}
           <ThemeToggle />
         </div>
@@ -118,7 +128,10 @@ function CompactDesktopHeader({ items }: Pick<HeaderPartProps, 'items'>) {
             linkClassName="inline-block py-1"
           />
         </nav>
-        <ThemeToggle />
+        <div className="flex">
+          <SearchLink />
+          <ThemeToggle />
+        </div>
       </div>
     </div>
   );
