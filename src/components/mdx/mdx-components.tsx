@@ -1,7 +1,11 @@
 import Link from 'next/link';
 import type { ComponentPropsWithoutRef, ReactNode } from 'react';
 
+import type { ArticleBodyContent } from '@/content';
 import { getTagPath } from '@/lib/slug';
+
+import { Figure, type FigureProps } from './Figure';
+import { Spoiler } from './Spoiler';
 
 /**
  * How each element of an MDX body is rendered. Markdown elements get the article typography;
@@ -96,7 +100,7 @@ function ThematicBreak() {
   );
 }
 
-export const mdxComponents = {
+const markdownAndInlineComponents = {
   Tag,
   Highlight,
   PullQuote,
@@ -109,3 +113,20 @@ export const mdxComponents = {
   blockquote: Blockquote,
   hr: ThematicBreak,
 };
+
+/**
+ * The components for one body. `<Figure>` gets the dimensions the content layer measured
+ * for that body's images, so images render without layout shift.
+ */
+export function createMdxComponents(body: Pick<ArticleBodyContent, 'imageSizes'>) {
+  function BodyFigure(props: FigureProps) {
+    const size = body.imageSizes[props.src];
+    if (!size) {
+      // The catalog measures every <Figure> image, so this only happens with a broken source.
+      throw new Error(`Image "${props.src}" was not measured by the content layer.`);
+    }
+    return <Figure {...props} size={size} />;
+  }
+
+  return { ...markdownAndInlineComponents, Figure: BodyFigure, Spoiler };
+}
