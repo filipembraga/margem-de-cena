@@ -25,7 +25,10 @@
     "prepare": "husky"
   },
   "dependencies": {
+    "@fontsource/cormorant-garamond": "^5.3.0",
+    "@fontsource/inter": "^5.3.0",
     "@mdx-js/mdx": "^3.1.1",
+    "image-size": "^2.1.0",
     "lucide-react": "^1.75.0",
     "next": "16.4.6",
     "react": "19.3.1",
