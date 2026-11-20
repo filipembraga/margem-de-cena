@@ -1,3 +1,5 @@
+import type { ImageSize } from './types';
+
 /**
  * The boundary between where content is stored and how it is validated and queried.
  *
@@ -31,6 +33,9 @@ export type RawContent = {
 export interface ContentSource {
   /** Loads every record. Demo records are included only when asked for. */
   load(options: { includeDemo: boolean }): Promise<RawContent>;
-  /** Whether an image path (e.g. `/images/x.jpg`) points to an existing file. */
-  imageExists(src: string): Promise<boolean>;
+  /**
+   * Dimensions of the image at a path such as `/images/x.jpg`, or `null` when there is no
+   * readable image there. Dimensions let images render without layout shift.
+   */
+  readImageSize(src: string): Promise<ImageSize | null>;
 }

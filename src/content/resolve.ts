@@ -1,13 +1,16 @@
 import { getArticlePath } from '@/lib/categories';
 import { estimateReadingTimeInMinutes } from '@/lib/reading-time';
 
+import type { CompiledBody } from './mdx/compile';
 import type { ParsedArticle, ParsedContent, ParsedRecord } from './parse';
 import type { AuthorData, ImageData, WorkData } from './schemas';
 import type {
   Article,
+  ArticleBodyContent,
   ArticleSummary,
   Author,
   ImageAsset,
+  ImageSize,
   Page,
   PageSlug,
   TwoPerspectives,
@@ -33,10 +36,13 @@ export type ContentCatalog = {
 export const AUTHOR_PATH_PREFIX = '/autores';
 export const TWO_PERSPECTIVES_PATH = '/duas-leituras';
 
-export function resolveCatalog(content: ParsedContent): ContentCatalog {
-  const authors = content.authors.map(resolveAuthor);
+/** Dimensions of every referenced image, by path, as measured by the catalog. */
+export type ImageSizes = ReadonlyMap<string, ImageSize>;
+
+export function resolveCatalog(content: ParsedContent, imageSizes: ImageSizes): ContentCatalog {
+  const authors = content.authors.map((author) => resolveAuthor(author, imageSizes));
   const authorsBySlug = new Map(authors.map((author) => [author.slug, author]));
-  const works = content.works.map(resolveWork);
+  const works = content.works.map((work) => resolveWork(work, imageSizes));
   const worksBySlug = new Map(works.map((work) => [work.slug, work]));
 
   const twoPerspectivesSlugByArticle = new Map<string, string>();
@@ -52,6 +58,7 @@ export function resolveCatalog(content: ParsedContent): ContentCatalog {
       resolveArticle(article, {
         authorsBySlug,
         worksBySlug,
+        imageSizes,
         twoPerspectivesSlug: twoPerspectivesSlugByArticle.get(article.record.slug) ?? null,
       }),
     )
@@ -83,7 +90,7 @@ export function resolveCatalog(content: ParsedContent): ContentCatalog {
     slug: record.slug as PageSlug,
     title: data.title,
     description: data.description,
-    body: { format: 'mdx', compiledCode: body.compiledCode },
+    body: resolveBody(body, imageSizes),
   }));
 
   return { articles, authors, works, twoPerspectives, pages };
@@ -95,30 +102,38 @@ export function toSummary(article: Article): ArticleSummary {
   return summary;
 }
 
-function resolveImage(image: ImageData | undefined): ImageAsset | null {
-  return image ? { ...image } : null;
+function resolveImage(image: ImageData | undefined, imageSizes: ImageSizes): ImageAsset | null {
+  return image ? { ...image, ...requireValue(imageSizes.get(image.src), image.src) } : null;
 }
 
-function resolveAuthor({ record, data }: ParsedRecord<AuthorData>): Author {
+function resolveBody(body: CompiledBody, imageSizes: ImageSizes): ArticleBodyContent {
+  const bodyImageSizes: Record<string, ImageSize> = {};
+  for (const { src } of body.images) {
+    bodyImageSizes[src] = requireValue(imageSizes.get(src), src);
+  }
+  return { format: 'mdx', compiledCode: body.compiledCode, imageSizes: bodyImageSizes };
+}
+
+function resolveAuthor({ record, data }: ParsedRecord<AuthorData>, imageSizes: ImageSizes): Author {
   return {
     slug: record.slug,
     name: data.name,
     path: `${AUTHOR_PATH_PREFIX}/${record.slug}`,
     shortBio: data.shortBio,
     fullBio: data.fullBio,
-    profileImage: resolveImage(data.profileImage),
+    profileImage: resolveImage(data.profileImage, imageSizes),
     instagramHandle: data.instagram ?? null,
   };
 }
 
-function resolveWork({ record, data }: ParsedRecord<WorkData>): Work {
+function resolveWork({ record, data }: ParsedRecord<WorkData>, imageSizes: ImageSizes): Work {
   const base = {
     slug: record.slug,
     title: data.title,
     originalTitle: data.originalTitle ?? null,
     year: data.year ?? null,
     genre: data.genre ?? null,
-    cover: resolveImage(data.cover),
+    cover: resolveImage(data.cover, imageSizes),
     isDemo: record.isDemo,
   };
 
@@ -153,12 +168,13 @@ function resolveWork({ record, data }: ParsedRecord<WorkData>): Work {
 type ArticleRelations = {
   authorsBySlug: Map<string, Author>;
   worksBySlug: Map<string, Work>;
+  imageSizes: ImageSizes;
   twoPerspectivesSlug: string | null;
 };
 
 function resolveArticle(
   { record, data, body, tags }: ParsedArticle,
-  { authorsBySlug, worksBySlug, twoPerspectivesSlug }: ArticleRelations,
+  { authorsBySlug, worksBySlug, imageSizes, twoPerspectivesSlug }: ArticleRelations,
 ): Article {
   return {
     slug: record.slug,
@@ -175,7 +191,7 @@ function resolveArticle(
     publishedAt: data.publishedAt ?? '',
     updatedAt: data.updatedAt ?? null,
     readingTimeInMinutes: estimateReadingTimeInMinutes(body.wordCount),
-    cover: resolveImage(data.cover),
+    cover: resolveImage(data.cover, imageSizes),
     work: data.work ? requireValue(worksBySlug.get(data.work), data.work) : null,
     tags,
     isFeatured: data.featured,
@@ -183,7 +199,7 @@ function resolveArticle(
     isDemo: record.isDemo,
     twoPerspectivesSlug,
     references: data.references,
-    body: { format: 'mdx', compiledCode: body.compiledCode },
+    body: resolveBody(body, imageSizes),
   };
 }
 

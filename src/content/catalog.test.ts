@@ -2,50 +2,8 @@ import { describe, expect, it } from 'vitest';
 
 import { buildCatalog } from './catalog';
 import { ContentValidationError, type ContentIssue } from './issues';
+import { articleInput, contentWith } from './testing/fixtures';
 import { createInMemorySource, type InMemoryContent } from './testing/in-memory-source';
-
-const authors = [
-  { slug: 'filipe-braga', data: { name: 'Filipe Braga', shortBio: 'Bio.', fullBio: 'Bio.' } },
-  {
-    slug: 'adriana-guimaraes',
-    data: { name: 'Adriana Guimarães', shortBio: 'Bio.', fullBio: 'Bio.' },
-  },
-];
-
-const pages = ['sobre', 'contato', 'privacidade', 'creditos'].map((slug) => ({
-  slug,
-  data: { title: slug, description: 'Descrição.' },
-  body: 'Texto.',
-}));
-
-const filmWork = { slug: 'a-casa', data: { category: 'film', title: 'A casa' } };
-
-function articleInput(slug: string, overrides: Record<string, unknown> = {}, body = 'Texto.') {
-  const isDemo = overrides.status === 'demo';
-  return {
-    slug,
-    isDemo,
-    body,
-    data: {
-      title: `Título de ${slug}`,
-      excerpt: 'Resumo.',
-      category: 'film',
-      authors: ['filipe-braga'],
-      status: 'published',
-      publishedAt: '2026-11-12',
-      ...overrides,
-    },
-  };
-}
-
-function contentWith(extra: InMemoryContent): InMemoryContent {
-  return {
-    authors,
-    pages,
-    works: [filmWork],
-    ...extra,
-  };
-}
 
 async function collectIssues(
   content: InMemoryContent,
@@ -203,7 +161,7 @@ describe('article bodies', () => {
     expect(issues.map((issue) => [issue.line, issue.message])).toEqual([
       [1, '"import" e "export" não são permitidos no texto.'],
       [3, 'Expressões entre chaves ({...}) não são permitidas no texto.'],
-      [5, 'Componente <Video> não permitido. Use: Tag, Highlight, PullQuote, MarginNote.'],
+      [5, 'Componente <Video> não permitido. Use: Tag, Highlight, PullQuote, MarginNote, Spoiler, Figure.'],
     ]);
   });
 
@@ -311,13 +269,14 @@ describe('Duas Leituras', () => {
 
 describe('images', () => {
   const cover = { src: '/images/a-mare.jpg', alt: 'Uma casa.', credit: 'Foto.', license: 'CC BY' };
+  const knownImages = { '/images/a-mare.jpg': { width: 1600, height: 900 } };
 
   it('requires referenced images to exist', async () => {
     const issues = await collectIssues(
       contentWith({ articles: [articleInput('a-mare', { cover })] }),
     );
 
-    expect(messagesOf(issues)).toBe('Imagem não encontrada: public/images/a-mare.jpg.');
+    expect(messagesOf(issues)).toBe('Imagem não encontrada ou ilegível: public/images/a-mare.jpg.');
   });
 
   it('requires alt text, credit and licence', async () => {
@@ -330,5 +289,133 @@ describe('images', () => {
       expect.stringMatching(/^cover\.credit:/),
       expect.stringMatching(/^cover\.license:/),
     ]);
+  });
+
+  it('adds the intrinsic dimensions to covers', async () => {
+    const source = createInMemorySource(
+      contentWith({ articles: [articleInput('a-mare', { cover })] }),
+      knownImages,
+    );
+
+    const catalog = await buildCatalog(source, { includeDemo: false });
+
+    expect(catalog.articles[0]?.cover).toEqual({ ...cover, width: 1600, height: 900 });
+  });
+});
+
+describe('figures in the body', () => {
+  const figure =
+    '<Figure src="/images/a-mare.jpg" alt="Uma casa." credit="Foto." license="CC BY" />';
+  const knownImages = { '/images/a-mare.jpg': { width: 1200, height: 1800 } };
+
+  it('keeps the dimensions of the images the body places', async () => {
+    const source = createInMemorySource(
+      contentWith({ articles: [articleInput('a-mare', {}, `Antes.\n\n${figure}\n\nDepois.`)] }),
+      knownImages,
+    );
+
+    const catalog = await buildCatalog(source, { includeDemo: false });
+
+    expect(catalog.articles[0]?.body.imageSizes).toEqual({
+      '/images/a-mare.jpg': { width: 1200, height: 1800 },
+    });
+  });
+
+  it('reports a missing image with its line', async () => {
+    const issues = await collectIssues(
+      contentWith({ articles: [articleInput('a-mare', {}, `Antes.\n\n${figure}`)] }),
+    );
+
+    expect(issues).toEqual([
+      expect.objectContaining({
+        message: 'Imagem não encontrada ou ilegível: public/images/a-mare.jpg.',
+        line: 3,
+      }),
+    ]);
+  });
+
+  it('requires alt text, credit and licence', async () => {
+    const issues = await collectIssues(
+      contentWith({
+        articles: [articleInput('a-mare', {}, '<Figure src="/images/a-mare.jpg" alt="" />')],
+      }),
+      { includeDemo: false },
+    );
+
+    expect(issues.map((issue) => issue.message)).toEqual([
+      '<Figure> precisa do atributo alt="...".',
+      '<Figure> precisa do atributo credit="...".',
+      '<Figure> precisa do atributo license="...".',
+    ]);
+  });
+
+  it('must stand in its own paragraph, without content', async () => {
+    const issues = await collectIssues(
+      contentWith({
+        articles: [
+          articleInput(
+            'a-mare',
+            {},
+            'Texto <Figure src="/images/a-mare.jpg" alt="A." credit="B." license="C." /> no meio.\n\n' +
+              '<Figure src="/images/a-mare.jpg" alt="A." credit="B." license="C.">Legenda</Figure>',
+          ),
+        ],
+      }),
+    );
+
+    expect(messagesOf(issues)).toContain('<Figure> deve ficar em um parágrafo próprio');
+    expect(messagesOf(issues)).toContain('<Figure> não tem conteúdo entre as marcações');
+  });
+
+  it('suggests <Figure> for Markdown images', async () => {
+    const issues = await collectIssues(
+      contentWith({ articles: [articleInput('a-mare', {}, '![Uma casa](/images/a-mare.jpg)')] }),
+    );
+
+    expect(messagesOf(issues)).toContain('use <Figure src="..." alt="..." />');
+  });
+});
+
+describe('spoilers in the body', () => {
+  it('accepts a spoiler in its own paragraph and counts its words', async () => {
+    const source = createInMemorySource(
+      contentWith({
+        articles: [
+          articleInput(
+            'a-mare',
+            {},
+            '<Spoiler description="O final.">\n\nA mesa está posta para uma pessoa.\n\n</Spoiler>',
+          ),
+        ],
+      }),
+    );
+
+    const catalog = await buildCatalog(source, { includeDemo: false });
+
+    expect(catalog.articles).toHaveLength(1);
+  });
+
+  it('rejects a spoiler inside another spoiler', async () => {
+    const issues = await collectIssues(
+      contentWith({
+        articles: [
+          articleInput(
+            'a-mare',
+            {},
+            '<Spoiler>\n\n<Spoiler>\n\nTexto.\n\n</Spoiler>\n\n</Spoiler>',
+          ),
+        ],
+      }),
+    );
+
+    expect(messagesOf(issues)).toBe('Um <Spoiler> não pode ficar dentro de outro <Spoiler>.');
+  });
+
+  it('rejects a spoiler in the middle of a sentence', async () => {
+    const issues = await collectIssues(
+      contentWith({ articles: [articleInput('a-mare', {}, 'Texto <Spoiler>final</Spoiler>.')] }),
+    );
+
+    expect(messagesOf(issues)).toContain('<Spoiler> deve ficar em um parágrafo próprio');
   });
 });

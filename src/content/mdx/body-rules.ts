@@ -1,11 +1,16 @@
 import { countWords } from '@/lib/reading-time';
 
+import { IMAGE_SOURCE_PATTERN } from '../schemas';
+
 /**
  * A remark plugin that runs once per body while it is compiled (docs/adr/0003). In one walk it:
  *
  * - rejects what authors must not use: `import`/`export`, `{expressions}`, raw HTML and
  *   components outside the allowed list, Markdown images and level-1 headings;
+ * - checks each component's attributes and placement (`<Figure>` and `<Spoiler>` stand in
+ *   their own paragraph; a spoiler is never nested in another);
  * - collects `<Tag>` mentions, which populate the article's tags (docs/adr/0007);
+ * - collects `<Figure>` images, so the catalog can check them and read their dimensions;
  * - numbers `<MarginNote>` elements, so the reference and the note share a number;
  * - counts words for the reading time.
  *
@@ -20,18 +25,42 @@ export type BodyIssue = {
   line: number | null;
 };
 
+/** An image placed in the body with `<Figure src="...">`. */
+export type BodyImage = {
+  src: string;
+  line: number | null;
+};
+
 export type BodyAnalysis = {
   tagMentions: string[];
+  images: BodyImage[];
   wordCount: number;
   issues: BodyIssue[];
 };
 
-/** Components an author may use, with the attributes each one accepts. */
-const ALLOWED_COMPONENTS: Record<string, readonly string[]> = {
-  Tag: ['name'],
-  Highlight: [],
-  PullQuote: [],
-  MarginNote: [],
+type ComponentRule = {
+  /** Attributes the component accepts, all written as text (`name="..."`). */
+  attributes: readonly string[];
+  requiredAttributes?: readonly string[];
+  /** Must stand in its own paragraph, separated from the text by blank lines. */
+  isBlock?: boolean;
+  /** Takes no content: written as `<Figure ... />`. */
+  isSelfClosing?: boolean;
+};
+
+/** Components an author may use (docs/como-publicar.md), with their rules. */
+const ALLOWED_COMPONENTS: Record<string, ComponentRule> = {
+  Tag: { attributes: ['name'] },
+  Highlight: { attributes: [] },
+  PullQuote: { attributes: [] },
+  MarginNote: { attributes: [] },
+  Spoiler: { attributes: ['description'], isBlock: true },
+  Figure: {
+    attributes: ['src', 'alt', 'caption', 'credit', 'license'],
+    requiredAttributes: ['src', 'alt', 'credit', 'license'],
+    isBlock: true,
+    isSelfClosing: true,
+  },
 };
 
 export const ALLOWED_COMPONENT_NAMES = Object.keys(ALLOWED_COMPONENTS);
@@ -62,8 +91,9 @@ type CompiledFile = {
 
 export function remarkBodyRules() {
   return function analyzeBody(tree: SyntaxNode, file: CompiledFile): void {
-    const analysis: BodyAnalysis = { tagMentions: [], wordCount: 0, issues: [] };
+    const analysis: BodyAnalysis = { tagMentions: [], images: [], wordCount: 0, issues: [] };
     let marginNoteCount = 0;
+    let isInsideSpoiler = false;
 
     function reportIssue(message: string, node: SyntaxNode): void {
       analysis.issues.push({ message, line: node.position?.start.line ?? null });
@@ -80,7 +110,7 @@ export function remarkBodyRules() {
           return;
         case 'image':
         case 'imageReference':
-          reportIssue('Imagens no corpo do texto ainda não são suportadas.', node);
+          reportIssue('Para pôr uma imagem no texto, use <Figure src="..." alt="..." />.', node);
           return;
         case 'heading':
           if (node.depth === 1) {
@@ -99,9 +129,16 @@ export function remarkBodyRules() {
           if (node.name === 'Tag') {
             collectTagMention(node);
           }
+          if (node.name === 'Figure') {
+            collectImage(node);
+          }
           if (node.name === 'MarginNote') {
             marginNoteCount += 1;
             numberMarginNote(node, marginNoteCount);
+          }
+          if (node.name === 'Spoiler') {
+            visitSpoiler(node);
+            return;
           }
           break;
       }
@@ -109,12 +146,22 @@ export function remarkBodyRules() {
       node.children?.forEach(visit);
     }
 
+    function visitSpoiler(node: SyntaxNode): void {
+      if (isInsideSpoiler) {
+        reportIssue('Um <Spoiler> não pode ficar dentro de outro <Spoiler>.', node);
+        return;
+      }
+      isInsideSpoiler = true;
+      node.children?.forEach(visit);
+      isInsideSpoiler = false;
+    }
+
     /** Returns false when the element is not allowed, so its content is not analyzed. */
     function checkComponent(node: SyntaxNode): boolean {
       const componentName = node.name ?? '';
-      const allowedAttributes = ALLOWED_COMPONENTS[componentName];
+      const rule = ALLOWED_COMPONENTS[componentName];
 
-      if (!allowedAttributes) {
+      if (!rule) {
         const shownName = componentName === '' ? '<>' : `<${componentName}>`;
         reportIssue(
           `Componente ${shownName} não permitido. Use: ${ALLOWED_COMPONENT_NAMES.join(', ')}.`,
@@ -123,26 +170,55 @@ export function remarkBodyRules() {
         return false;
       }
 
-      for (const attribute of node.attributes ?? []) {
-        const isTextAttribute =
-          attribute.type === 'mdxJsxAttribute' && typeof attribute.value === 'string';
-        const isKnownAttribute = allowedAttributes.includes(attribute.name ?? '');
+      checkAttributes(node, componentName, rule);
 
-        if (!isTextAttribute || !isKnownAttribute) {
-          reportIssue(
-            `Atributo não permitido em <${componentName}>` +
-              (allowedAttributes.length > 0
-                ? `. Aceita apenas: ${allowedAttributes.map((name) => `${name}="..."`).join(', ')}.`
-                : ': este componente não aceita atributos.'),
-            node,
-          );
-        }
+      if (rule.isBlock && node.type !== 'mdxJsxFlowElement') {
+        reportIssue(
+          `<${componentName}> deve ficar em um parágrafo próprio, separado do texto por linhas em branco.`,
+          node,
+        );
+      }
+      if (rule.isSelfClosing && (node.children ?? []).length > 0) {
+        reportIssue(
+          `<${componentName}> não tem conteúdo entre as marcações: escreva <${componentName} ... />.`,
+          node,
+        );
       }
       return true;
     }
 
+    function checkAttributes(node: SyntaxNode, componentName: string, rule: ComponentRule): void {
+      const attributeNames = new Set<string>();
+
+      for (const attribute of node.attributes ?? []) {
+        const isTextAttribute =
+          attribute.type === 'mdxJsxAttribute' && typeof attribute.value === 'string';
+        const isKnownAttribute = rule.attributes.includes(attribute.name ?? '');
+
+        if (!isTextAttribute || !isKnownAttribute) {
+          reportIssue(
+            `Atributo não permitido em <${componentName}>` +
+              (rule.attributes.length > 0
+                ? `. Aceita apenas: ${rule.attributes.map((name) => `${name}="..."`).join(', ')}.`
+                : ': este componente não aceita atributos.'),
+            node,
+          );
+          continue;
+        }
+        if (String(attribute.value).trim() !== '') {
+          attributeNames.add(attribute.name ?? '');
+        }
+      }
+
+      for (const requiredName of rule.requiredAttributes ?? []) {
+        if (!attributeNames.has(requiredName)) {
+          reportIssue(`<${componentName}> precisa do atributo ${requiredName}="...".`, node);
+        }
+      }
+    }
+
     function collectTagMention(node: SyntaxNode): void {
-      const nameAttribute = node.attributes?.find((attribute) => attribute.name === 'name');
+      const tagNameAttribute = readTextAttribute(node, 'name');
       const children = node.children ?? [];
       const hasOnlyText = children.every((child) => child.type === 'text');
 
@@ -152,13 +228,29 @@ export function remarkBodyRules() {
       }
 
       const visibleText = children.map((child) => String(child.value)).join('');
-      const tagName = typeof nameAttribute?.value === 'string' ? nameAttribute.value : visibleText;
+      const tagName = tagNameAttribute ?? visibleText;
 
       if (tagName.trim() === '') {
         reportIssue('<Tag> vazia: escreva o texto da etiqueta entre as marcações.', node);
         return;
       }
       analysis.tagMentions.push(tagName.trim());
+    }
+
+    function collectImage(node: SyntaxNode): void {
+      const source = readTextAttribute(node, 'src');
+      if (source === null) {
+        // The missing attribute was already reported by checkAttributes.
+        return;
+      }
+      if (!IMAGE_SOURCE_PATTERN.test(source)) {
+        reportIssue(
+          'O caminho da imagem deve começar com "/images/" (arquivo dentro de public/images).',
+          node,
+        );
+        return;
+      }
+      analysis.images.push({ src: source, line: node.position?.start.line ?? null });
     }
 
     function numberMarginNote(node: SyntaxNode, number: number): void {
@@ -171,4 +263,9 @@ export function remarkBodyRules() {
     visit(tree);
     file.data[BODY_ANALYSIS_KEY] = analysis;
   };
+}
+
+function readTextAttribute(node: SyntaxNode, name: string): string | null {
+  const attribute = node.attributes?.find((candidate) => candidate.name === name);
+  return typeof attribute?.value === 'string' ? attribute.value : null;
 }

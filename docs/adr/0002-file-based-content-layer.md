@@ -27,7 +27,9 @@ ContentSource  ->  Zod schemas  ->  integrity checks  ->  ContentCatalog  ->  qu
 
 Query functions (`getPublishedArticles`, `getArticle`, `getTwoPerspectives`, ...) are async and
 return domain types, never raw frontmatter. Listing types (`ArticleSummary`) carry no body.
-Article bodies are typed as `{ format: 'mdx'; source: string }`.
+Article bodies are typed as `{ format: 'mdx'; compiledCode: string; imageSizes }`: the MDX
+is compiled once when the catalog loads (ADR 0003), and the dimensions of the body's images
+travel with it (ADR 0010). *Amended on 2026-11-20; the first version stored the MDX source.*
 
 **Model.**
 
@@ -53,7 +55,8 @@ fail the build:
   one entry.
 - `publishedAt` is required unless the status is `draft`, and `updatedAt` cannot precede it.
 - At most one published article is `featured`.
-- Image files exist, and every image has alt text, a credit and a licence.
+- Image files exist and can be read (their dimensions are kept, ADR 0010), and every image
+  has alt text, a credit and a licence.
 - Two tag spellings that produce the same slug are an error.
 
 Validation messages are written in pt-BR, because the authors are the ones who read them.
