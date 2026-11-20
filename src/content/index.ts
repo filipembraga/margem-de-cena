@@ -6,15 +6,18 @@ import { environment } from '@/lib/env';
 import { buildCatalog } from './catalog';
 import type { ContentCatalog } from './resolve';
 import {
+  selectAdjacentArticles,
   selectArticle,
   selectArticles,
   selectAuthor,
   selectFeaturedArticle,
   selectPage,
+  selectRelatedArticles,
   selectSectionsWithContent,
   selectTag,
   selectTags,
   selectTwoPerspectives,
+  type AdjacentArticles,
   type ArticleFilter,
 } from './selectors';
 import { createFilesystemSource } from './sources/filesystem';
@@ -36,7 +39,7 @@ import type {
  */
 
 export type * from './types';
-export type { ArticleFilter } from './selectors';
+export type { AdjacentArticles, ArticleFilter } from './selectors';
 
 function loadFreshCatalog(): Promise<ContentCatalog> {
   return buildCatalog(createFilesystemSource(), { includeDemo: environment.showDemoContent });
@@ -64,6 +67,16 @@ export async function getArticle(category: Category, slug: string): Promise<Arti
   return selectArticle(await loadCatalog(), category, slug);
 }
 
+/** The articles published just before and just after this one, across all categories. */
+export async function getAdjacentArticles(slug: string): Promise<AdjacentArticles> {
+  return selectAdjacentArticles(await loadCatalog(), slug);
+}
+
+/** "Leia também": up to `limit` articles related to this one. */
+export async function getRelatedArticles(slug: string, limit = 3): Promise<ArticleSummary[]> {
+  return selectRelatedArticles(await loadCatalog(), slug, limit);
+}
+
 /** The home page hero: the featured article, or the most recent one. */
 export async function getFeaturedArticle(): Promise<ArticleSummary | null> {
   return selectFeaturedArticle(await loadCatalog());
@@ -89,6 +102,11 @@ export async function getAllTwoPerspectives(): Promise<TwoPerspectives[]> {
 
 export async function getTwoPerspectives(slug: string): Promise<TwoPerspectives | null> {
   return selectTwoPerspectives(await loadCatalog(), slug);
+}
+
+/** Sobre, Contato, Privacidade and Créditos. */
+export async function getPages(): Promise<Page[]> {
+  return (await loadCatalog()).pages;
 }
 
 export async function getPage(slug: PageSlug): Promise<Page> {
