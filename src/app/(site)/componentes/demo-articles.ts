@@ -4,8 +4,8 @@ import { getArticlePath } from '@/lib/categories';
 /*
  * Fictional demonstration data, taken from the approved mockups, used only by the component
  * preview. The page that imports it returns 404 unless SHOW_DEMO_CONTENT=true, so it never
- * reaches production (docs/adr/0004-demo-content-isolation.md). Real content comes from the
- * content layer in Stage 3.
+ * reaches production (docs/adr/0004-demo-content-isolation.md). Pages get their articles
+ * from the content layer; this fixed data keeps the preview independent of it.
  */
 
 const FILIPE = { name: 'Filipe Braga' };
