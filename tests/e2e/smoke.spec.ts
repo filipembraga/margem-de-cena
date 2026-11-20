@@ -19,9 +19,61 @@ test.describe('pages', () => {
   }
 });
 
+test.describe('links', () => {
+  test('every internal link on every page leads to an existing page', async ({ page, request }) => {
+    test.skip(
+      (page.viewportSize()?.width ?? 0) < DESKTOP_BREAKPOINT,
+      'Links are the same at every width; checking once is enough.',
+    );
+    const internalPaths = new Set<string>();
+
+    for (const { path } of PAGES) {
+      await page.goto(path);
+      const hrefs = await page
+        .locator('a[href^="/"]')
+        .evaluateAll((links) => links.map((link) => link.getAttribute('href') ?? ''));
+      hrefs.forEach((href) => internalPaths.add(href.split('#')[0] ?? href));
+    }
+
+    for (const path of internalPaths) {
+      const response = await request.get(path);
+      expect(response.status(), `${path} should exist`).toBe(200);
+    }
+  });
+
+  test('a Duas Leituras article links to the other reading', async ({ page }) => {
+    await page.goto('/filmes/a-mare-que-nao-volta');
+
+    await page.getByRole('link', { name: 'O que a gente deixa nos cômodos' }).click();
+
+    await expect(page).toHaveURL('/filmes/o-que-a-gente-deixa-nos-comodos');
+    await expect(page.getByRole('link', { name: 'A maré que não volta' })).toBeVisible();
+  });
+
+  test('an inline tag mention opens the tag page', async ({ page }) => {
+    await page.goto('/filmes/a-mare-que-nao-volta');
+
+    await page
+      .getByRole('article')
+      .getByRole('link', { name: 'memória', exact: true })
+      .first()
+      .click();
+
+    await expect(page).toHaveURL('/tags/memoria');
+    await expect(page.getByRole('heading', { level: 1 })).toHaveText('memória');
+  });
+});
+
 test.describe('not found', () => {
   const UNKNOWN_PATH = '/endereco-que-nao-existe';
-  test.use({ expectedFailedPaths: [UNKNOWN_PATH] });
+  const UNKNOWN_ARTICLE_PATH = '/filmes/texto-que-nao-existe';
+  test.use({ expectedFailedPaths: [UNKNOWN_PATH, UNKNOWN_ARTICLE_PATH] });
+
+  test('answers an unknown article slug with a real 404', async ({ page }) => {
+    const response = await page.goto(UNKNOWN_ARTICLE_PATH);
+
+    expect(response?.status()).toBe(404);
+  });
 
   test('answers an unknown address with the pt-BR 404 page', async ({ page }) => {
     const response = await page.goto(UNKNOWN_PATH);

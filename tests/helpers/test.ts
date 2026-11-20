@@ -1,30 +1,12 @@
 import { test as base, expect, type ConsoleMessage } from '@playwright/test';
 
-/**
- * Routes linked from the header and footer that are built in Stage 3. Next.js prefetches
- * every visible link, so until these pages exist the browser logs a 404 for each of them.
- * Remove entries as the routes ship; the list must be empty by the end of Stage 3.
- */
-const ROUTES_PENDING_IMPLEMENTATION = [
-  '/filmes',
-  '/livros',
-  '/series',
-  '/duas-leituras',
-  '/ensaios',
-  '/sobre',
-  '/busca',
-  '/contato',
-  '/privacidade',
-  '/creditos',
-];
-
 function isExpectedFailedRequest(message: ConsoleMessage, expectedFailedPaths: string[]): boolean {
   if (!message.text().startsWith('Failed to load resource')) {
     return false;
   }
 
   const failedPath = new URL(message.location().url).pathname;
-  return [...ROUTES_PENDING_IMPLEMENTATION, ...expectedFailedPaths].includes(failedPath);
+  return expectedFailedPaths.includes(failedPath);
 }
 
 type Fixtures = {
@@ -58,9 +40,21 @@ export const test = base.extend<Fixtures>({
 
 export { expect };
 
-/** Pages that exist in this stage, used by the smoke and accessibility suites. */
+/**
+ * One page of each kind, used by the smoke and accessibility suites. The suites run against
+ * a build with demo content (playwright.config.ts), so these paths are demonstration entries.
+ */
 export const PAGES = [
   { path: '/', name: 'página inicial' },
+  { path: '/filmes', name: 'arquivo de categoria' },
+  { path: '/ensaios', name: 'arquivo de ensaios' },
+  { path: '/filmes/a-mare-que-nao-volta', name: 'página de artigo' },
+  { path: '/duas-leituras', name: 'arquivo de Duas Leituras' },
+  { path: '/duas-leituras/a-casa-das-mares', name: 'página de Duas Leituras' },
+  { path: '/autores/filipe-braga', name: 'página de autor' },
+  { path: '/tags/memoria', name: 'página de etiqueta' },
+  { path: '/sobre', name: 'página Sobre' },
+  { path: '/privacidade', name: 'página institucional' },
   { path: '/componentes', name: 'prévia de componentes' },
 ] as const;
 
