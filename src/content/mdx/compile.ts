@@ -4,12 +4,15 @@ import {
   BODY_ANALYSIS_KEY,
   remarkBodyRules,
   type BodyAnalysis,
+  type BodyImage,
   type BodyIssue,
 } from './body-rules';
 
 export type CompiledBody = {
   compiledCode: string;
   tagMentions: string[];
+  /** Images placed with `<Figure>`, checked and measured by the catalog. */
+  images: BodyImage[];
   wordCount: number;
 };
 
@@ -40,6 +43,7 @@ export async function compileBody(source: string, origin: string): Promise<Compi
       body: {
         compiledCode: String(file),
         tagMentions: analysis.tagMentions,
+        images: analysis.images,
         wordCount: analysis.wordCount,
       },
     };

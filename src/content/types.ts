@@ -6,7 +6,13 @@ import type { PlainDate } from '@/lib/dates';
  * never on raw frontmatter, so the source of the content can change without touching the UI.
  */
 
-export type ImageAsset = {
+/** Intrinsic dimensions of an image, in pixels, read when the catalog loads. */
+export type ImageSize = {
+  width: number;
+  height: number;
+};
+
+export type ImageAsset = ImageSize & {
   /** Path under `public/`, e.g. `/images/articles/a-casa.jpg`. */
   src: string;
   /** pt-BR description of the image. */
@@ -101,6 +107,8 @@ export type ArticleBodyContent = {
   format: 'mdx';
   /** Output of the MDX compiler (`function-body` format), run at render time. */
   compiledCode: string;
+  /** Dimensions of the images the body places with `<Figure>`, by path. */
+  imageSizes: Record<string, ImageSize>;
 };
 
 export type Article = ArticleSummary & {

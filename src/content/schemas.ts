@@ -31,11 +31,14 @@ export const categorySchema = z.enum(CATEGORIES, {
   error: 'Categoria inválida. Use "film", "book", "series" ou "essay".',
 });
 
+/** Images live under `public/images/` and are referenced from the site root. */
+export const IMAGE_SOURCE_PATTERN = /^\/images\/[\w./-]+$/;
+
 export const imageSchema = z.strictObject({
   src: z
     .string({ error: REQUIRED })
     .regex(
-      /^\/images\/[\w./-]+$/,
+      IMAGE_SOURCE_PATTERN,
       'O caminho da imagem deve começar com "/images/" (arquivo dentro de public/images).',
     ),
   alt: requiredText,

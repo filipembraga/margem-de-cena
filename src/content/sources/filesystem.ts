@@ -1,9 +1,11 @@
-import { access, readdir, readFile } from 'node:fs/promises';
+import { readdir, readFile } from 'node:fs/promises';
 import path from 'node:path';
 
+import { imageSizeFromFile } from 'image-size/fromFile';
 import { parse as parseYaml } from 'yaml';
 
 import type { ContentSource, RawContent, RawRecord } from '../source';
+import type { ImageSize } from '../types';
 
 /**
  * Reads content from the repository:
@@ -75,13 +77,13 @@ export function createFilesystemSource(rootDirectory: string = process.cwd()): C
       return { articles, authors, works, twoPerspectives, pages };
     },
 
-    async imageExists(src: string): Promise<boolean> {
+    async readImageSize(src: string): Promise<ImageSize | null> {
       try {
-        await access(path.join(publicDirectory, src));
-        return true;
+        const { width, height } = await imageSizeFromFile(path.join(publicDirectory, src));
+        return { width, height };
       } catch {
-        // A missing file is the answer, not a failure: the integrity check reports it.
-        return false;
+        // A missing or unreadable file is the answer, not a failure: the catalog reports it.
+        return null;
       }
     },
   };

@@ -1,4 +1,5 @@
 import type { ContentSource, RawContent, RawRecord } from '../source';
+import type { ImageSize } from '../types';
 
 /**
  * A `ContentSource` built from objects, for tests. It also shows how small a new source
@@ -21,9 +22,12 @@ function toRawRecord(collection: string, input: RecordInput): RawRecord {
   };
 }
 
+/** Images the source knows, by path. Any other path is a missing image. */
+export type InMemoryImages = Record<string, ImageSize>;
+
 export function createInMemorySource(
   content: InMemoryContent,
-  existingImages: readonly string[] = [],
+  images: InMemoryImages = {},
 ): ContentSource {
   return {
     async load({ includeDemo }): Promise<RawContent> {
@@ -40,8 +44,8 @@ export function createInMemorySource(
         pages: collection('pages'),
       };
     },
-    async imageExists(src: string): Promise<boolean> {
-      return existingImages.includes(src);
+    async readImageSize(src: string): Promise<ImageSize | null> {
+      return images[src] ?? null;
     },
   };
 }

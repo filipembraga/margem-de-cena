@@ -1,8 +1,9 @@
 import { checkIntegrity } from './integrity';
 import { ContentValidationError, type ContentIssue } from './issues';
 import { parseContent, type ParsedContent } from './parse';
-import { resolveCatalog, type ContentCatalog } from './resolve';
+import { resolveCatalog, type ContentCatalog, type ImageSizes } from './resolve';
 import type { ContentSource } from './source';
+import type { ImageSize } from './types';
 
 /**
  * Runs the whole pipeline (docs/adr/0002-file-based-content-layer.md):
@@ -20,35 +21,78 @@ export async function buildCatalog(
   const raw = await source.load(options);
   const { content, issues: parseIssues } = await parseContent(raw);
   const integrityIssues = checkIntegrity(content);
-  const imageIssues = await checkImages(content, source);
+  const { imageSizes, issues: imageIssues } = await measureImages(content, source);
 
   const issues = [...parseIssues, ...integrityIssues, ...imageIssues];
   if (issues.length > 0) {
     throw new ContentValidationError(issues);
   }
 
-  return resolveCatalog(content);
+  return resolveCatalog(content, imageSizes);
 }
 
-/** Every referenced image must exist under `public/`. Alt, credit and licence come from the schema. */
-async function checkImages(content: ParsedContent, source: ContentSource): Promise<ContentIssue[]> {
-  const imageReferences = [
-    ...content.articles.map(({ record, data }) => ({ origin: record.origin, image: data.cover })),
-    ...content.works.map(({ record, data }) => ({ origin: record.origin, image: data.cover })),
-    ...content.authors.map(({ record, data }) => ({
-      origin: record.origin,
-      image: data.profileImage,
-    })),
-  ];
+type ImageReference = {
+  origin: string;
+  src: string;
+  /** Line of a `<Figure>` in the body; covers and profile images have none. */
+  line: number | null;
+};
 
-  const issues = await Promise.all(
-    imageReferences.map(async ({ origin, image }): Promise<ContentIssue | null> => {
-      if (!image || (await source.imageExists(image.src))) {
-        return null;
-      }
-      return { origin, message: `Imagem não encontrada: public${image.src}.` };
-    }),
+/**
+ * Every referenced image (covers, profile images and `<Figure>` images in bodies) must be a
+ * readable image under `public/`. Their dimensions are kept so images render without layout
+ * shift. Alt text, credit and licence are checked by the schemas and the MDX rules.
+ */
+async function measureImages(
+  content: ParsedContent,
+  source: ContentSource,
+): Promise<{ imageSizes: ImageSizes; issues: ContentIssue[] }> {
+  const references = listImageReferences(content);
+  const uniqueSources = [...new Set(references.map((reference) => reference.src))];
+
+  const measuredImages = await Promise.all(
+    uniqueSources.map(async (src) => [src, await source.readImageSize(src)] as const),
   );
 
-  return issues.filter((issue) => issue !== null);
+  const imageSizes = new Map<string, ImageSize>();
+  for (const [src, size] of measuredImages) {
+    if (size !== null) {
+      imageSizes.set(src, size);
+    }
+  }
+
+  const issues: ContentIssue[] = references
+    .filter((reference) => !imageSizes.has(reference.src))
+    .map(({ origin, src, line }) => ({
+      origin,
+      line,
+      message: `Imagem não encontrada ou ilegível: public${src}.`,
+    }));
+
+  return { imageSizes, issues };
+}
+
+function listImageReferences(content: ParsedContent): ImageReference[] {
+  const references: ImageReference[] = [];
+
+  function addImage(origin: string, image: { src: string } | undefined): void {
+    if (image) {
+      references.push({ origin, src: image.src, line: null });
+    }
+  }
+
+  for (const { record, data, body } of content.articles) {
+    addImage(record.origin, data.cover);
+    references.push(...body.images.map((image) => ({ origin: record.origin, ...image })));
+  }
+  for (const { record, body } of content.pages) {
+    references.push(...body.images.map((image) => ({ origin: record.origin, ...image })));
+  }
+  for (const { record, data } of content.works) {
+    addImage(record.origin, data.cover);
+  }
+  for (const { record, data } of content.authors) {
+    addImage(record.origin, data.profileImage);
+  }
+  return references;
 }
