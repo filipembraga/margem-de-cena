@@ -9,8 +9,10 @@ import {
   CATEGORIES,
   findCategoryBySlug,
   getCategoryDefinition,
+  getCategoryPath,
   type Category,
 } from '@/lib/categories';
+import { buildPageMetadata } from '@/lib/seo';
 
 type CategoryPageProps = {
   params: Promise<{ category: string }>;
@@ -32,8 +34,13 @@ async function readCategory(params: CategoryPageProps['params']): Promise<Catego
 }
 
 export async function generateMetadata({ params }: CategoryPageProps): Promise<Metadata> {
-  const definition = getCategoryDefinition(await readCategory(params));
-  return { title: definition.pluralLabel, description: definition.description };
+  const category = await readCategory(params);
+  const definition = getCategoryDefinition(category);
+  return buildPageMetadata({
+    title: definition.pluralLabel,
+    description: definition.description,
+    path: getCategoryPath(category),
+  });
 }
 
 /** Archive of one category: every visible article, most recent first. */
