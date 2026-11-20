@@ -34,23 +34,26 @@ http://localhost:3000/componentes.
 | --------------------------- | ------------------------------------------------------------------ |
 | `pnpm dev`                  | Development server                                                 |
 | `pnpm build` / `pnpm start` | Production build and server                                        |
-| `pnpm check`                | Typecheck, lint and unit tests (run before every commit proposal)  |
+| `pnpm check`                | Typecheck, lint, unit tests and the no-drafts check (run before every commit proposal) |
 | `pnpm test`                 | Unit tests (Vitest)                                                |
 | `pnpm test:e2e`             | Smoke and accessibility tests (Playwright + axe) on a production build with demo content |
 | `pnpm format`               | Format with Prettier                                               |
+| `pnpm verify:production-build` | After `pnpm build` without demo content, fails if demo content reached the output |
 
 The first end-to-end run needs a browser: `pnpm exec playwright install chromium`.
 
 ## Project structure
 
 ```
-content/          articles, authors and works (MDX + YAML), from Stage 3
-src/app/          routes
-src/components/   presentational components (layout, ui, cards)
-src/content/      content layer: the only code that reads files, from Stage 3
-src/lib/          pure utilities: categories, dates, environment, theme, site config
+content/          articles, authors, works, Duas Leituras and pages (MDX + YAML)
+content/demo/     demonstration entries, read only when SHOW_DEMO_CONTENT=true
+src/app/          routes (thin: query the content layer, compose components)
+src/components/   presentational components (layout, ui, cards, article, mdx, home)
+src/content/      content layer: the only code that reads files
+src/lib/          pure utilities: categories, dates, slugs, environment, theme, site config
+scripts/          repository checks (no committed drafts, no demo in production builds)
 tests/            end-to-end and accessibility tests
-docs/             brief, design system, ADRs and engineering conventions
+docs/             brief, design system, ADRs, conventions and the writers' guide
 ```
 
 ## Documentation
@@ -59,6 +62,21 @@ docs/             brief, design system, ADRs and engineering conventions
 - [Design system](docs/design-system.md)
 - [Architecture decision records](docs/adr/)
 - [Engineering conventions](docs/engineering-conventions.md)
+- [Como publicar](docs/como-publicar.md): the writers' guide (pt-BR)
+
+## Content layer
+
+Content goes through one pipeline, so every problem in every file is reported together and
+fails the build ([ADR 0002](docs/adr/0002-file-based-content-layer.md)):
+
+```
+ContentSource -> parse (Zod schemas, MDX) -> integrity checks -> image checks -> ContentCatalog
+(filesystem)                                                                     -> queries
+```
+
+Pages import query functions from `src/content` (`getPublishedArticles`, `getArticle`,
+`getTwoPerspectives`, ...) and receive domain types, never raw frontmatter. A headless CMS
+would implement `ContentSource` and reuse everything after it.
 
 ## Workflow
 
