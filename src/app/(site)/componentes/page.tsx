@@ -186,7 +186,7 @@ export default function ComponentPreviewPage() {
           <div className="flex flex-wrap gap-2">
             <TagChip name="memória" />
             <TagChip name="luto" />
-            <TagChip name="Alice Hoffman" />
+            <TagChip name="enquadramento" />
             <TagChip name="Duas Leituras" tone="highlight" asLabel />
           </div>
           <div className="flex flex-wrap items-center justify-between gap-6 bg-inverse-bg p-8">
