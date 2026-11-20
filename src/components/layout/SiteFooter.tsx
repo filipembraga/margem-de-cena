@@ -1,14 +1,16 @@
 import Link from 'next/link';
 
-import { footerNavigation, siteConfig } from '@/lib/site-config';
+import { getSectionsWithContent } from '@/content';
+import { footerNavigation, siteConfig, withoutEmptySections } from '@/lib/site-config';
 
 import { Wordmark } from './Wordmark';
 
 /** Visible placeholder until the authors provide a contact address. */
 const CONTACT_EMAIL_PLACEHOLDER = '[contato@dominio]';
 
-export function SiteFooter() {
+export async function SiteFooter() {
   const currentYear = new Date().getFullYear();
+  const navigationItems = withoutEmptySections(footerNavigation, await getSectionsWithContent());
 
   return (
     <footer className="page-container flex flex-col gap-8 pt-14 pb-10">
@@ -16,7 +18,7 @@ export function SiteFooter() {
         <Wordmark layout="stacked" size="footer" />
         <nav aria-label="Rodapé">
           <ul className="flex flex-wrap gap-x-7 gap-y-3 type-meta">
-            {footerNavigation.map((item) => (
+            {navigationItems.map((item) => (
               <li key={item.href}>
                 <Link
                   href={item.href}
