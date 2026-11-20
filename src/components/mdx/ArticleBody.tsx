@@ -4,7 +4,7 @@ import * as jsxRuntime from 'react/jsx-runtime';
 import type { ArticleBodyContent } from '@/content';
 import { classNames } from '@/lib/class-names';
 
-import { mdxComponents } from './mdx-components';
+import { createMdxComponents } from './mdx-components';
 
 type ArticleBodyProps = {
   body: ArticleBodyContent;
@@ -31,7 +31,7 @@ export async function ArticleBody({ body, withDropCap = false, className }: Arti
         className,
       )}
     >
-      <MdxContent components={mdxComponents} />
+      <MdxContent components={createMdxComponents(body)} />
     </div>
   );
 }
