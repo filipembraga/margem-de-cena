@@ -250,6 +250,18 @@
   border-top: 3px double var(--fg);
 }
 
+/* The first letter of an article, in display type, spanning about three lines of body text. */
+@utility drop-cap {
+  & > p:first-child::first-letter {
+    float: left;
+    padding: 0.5rem 0.625rem 0 0;
+    font-family: var(--font-display);
+    font-size: clamp(4.5rem, 4.0109rem + 2.1739vw, 5.75rem); /* 72 → 92 */
+    line-height: 0.78;
+    color: var(--accent);
+  }
+}
+
 @layer base {
   html {
     background-color: var(--bg);
