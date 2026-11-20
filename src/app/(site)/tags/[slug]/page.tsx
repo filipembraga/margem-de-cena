@@ -4,6 +4,7 @@ import { notFound } from 'next/navigation';
 import { ArticleList } from '@/components/cards/ArticleList';
 import { PageHeader } from '@/components/layout/PageHeader';
 import { getPublishedArticles, getTag, getTags, type TagReference } from '@/content';
+import { buildPageMetadata } from '@/lib/seo';
 
 type TagPageProps = {
   params: Promise<{ slug: string }>;
@@ -26,7 +27,11 @@ async function readTag(params: TagPageProps['params']): Promise<TagReference> {
 
 export async function generateMetadata({ params }: TagPageProps): Promise<Metadata> {
   const tag = await readTag(params);
-  return { title: tag.name, description: `Textos da Margem de Cena sobre ${tag.name}.` };
+  return buildPageMetadata({
+    title: tag.name,
+    description: `Textos da Margem de Cena sobre ${tag.name}.`,
+    path: tag.path,
+  });
 }
 
 /** Every visible article marked with a tag, across all categories (ADR 0007). */

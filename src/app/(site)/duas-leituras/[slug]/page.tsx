@@ -19,6 +19,7 @@ import {
 } from '@/content';
 import { getCategoryDefinition } from '@/lib/categories';
 import { formatShortDate, toDateTimeAttribute } from '@/lib/dates';
+import { buildPageMetadata } from '@/lib/seo';
 
 type TwoPerspectivesPageProps = {
   params: Promise<{ slug: string }>;
@@ -41,7 +42,12 @@ async function readEntry(params: TwoPerspectivesPageProps['params']): Promise<Tw
 
 export async function generateMetadata({ params }: TwoPerspectivesPageProps): Promise<Metadata> {
   const entry = await readEntry(params);
-  return { title: `${entry.work.title} · Duas Leituras`, description: entry.introduction };
+  return buildPageMetadata({
+    title: `${entry.work.title} · Duas Leituras`,
+    description: entry.introduction,
+    path: entry.path,
+    hasOwnShareImage: true,
+  });
 }
 
 /** One work, two independent readings side by side, and the other entries below. */

@@ -10,14 +10,16 @@ import { EmptyState } from '@/components/ui/EmptyState';
 import { SectionHeading } from '@/components/ui/SectionHeading';
 import { TagChip } from '@/components/ui/TagChip';
 import { environment } from '@/lib/env';
+import { buildPageMetadata } from '@/lib/seo';
 
 import { essayDemoArticles, featuredDemoArticle, recentDemoArticles } from './demo-articles';
 
-export const metadata: Metadata = {
+export const metadata: Metadata = buildPageMetadata({
   title: 'Componentes',
   description: 'Prévia dos componentes visuais da Margem de Cena.',
-  robots: { index: false, follow: false },
-};
+  path: '/componentes',
+  isHiddenFromSearchEngines: true,
+});
 
 const COLOR_TOKENS = [
   { token: '--bg', label: 'Papel', swatchClassName: 'bg-bg' },

@@ -1,3 +1,4 @@
+import type { Metadata } from 'next';
 import Link from 'next/link';
 
 import { ArticleCard } from '@/components/cards/ArticleCard';
@@ -6,6 +7,8 @@ import { ArticleList } from '@/components/cards/ArticleList';
 import { AuthorCard } from '@/components/cards/AuthorCard';
 import { CategoryBlock } from '@/components/home/CategoryBlock';
 import { InstagramInvite } from '@/components/home/InstagramInvite';
+import { JsonLd } from '@/components/seo/JsonLd';
+import { buildWebsiteStructuredData } from '@/components/seo/structured-data';
 import { TwoPerspectivesBlock } from '@/components/two-perspectives/TwoPerspectivesBlock';
 import { ButtonLink } from '@/components/ui/Button';
 import { EmptyState } from '@/components/ui/EmptyState';
@@ -21,12 +24,18 @@ import {
 } from '@/content';
 import type { Category } from '@/lib/categories';
 import { environment } from '@/lib/env';
+import { buildPageMetadata } from '@/lib/seo';
 import { siteConfig } from '@/lib/site-config';
 
 const RECENT_ARTICLE_COUNT = 3;
 const ARTICLES_PER_CATEGORY_BLOCK = 2;
 const HOME_ESSAY_COUNT = 3;
 const CATEGORIES_WITH_BLOCKS: Category[] = ['film', 'book', 'series'];
+
+export const metadata: Metadata = buildPageMetadata({
+  description: siteConfig.description,
+  path: '/',
+});
 
 /**
  * The editorial showcase. Every block is hidden when it has nothing to show, so the page works
@@ -58,6 +67,7 @@ export default async function HomePage() {
   return (
     <>
       <h1 className="sr-only">{siteConfig.name}</h1>
+      <JsonLd data={buildWebsiteStructuredData(environment.siteUrl)} />
 
       <section aria-label="Em destaque" className="page-container pt-14 pb-18">
         <ArticleCard

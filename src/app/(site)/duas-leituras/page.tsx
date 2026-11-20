@@ -4,14 +4,16 @@ import { PageHeader } from '@/components/layout/PageHeader';
 import { TwoPerspectivesBlock } from '@/components/two-perspectives/TwoPerspectivesBlock';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { getAllTwoPerspectives } from '@/content';
+import { buildPageMetadata } from '@/lib/seo';
 
 const DESCRIPTION =
   'Uma mesma obra, dois textos independentes. Cada autor escreve a sua leitura sem ler a do outro antes da publicação.';
 
-export const metadata: Metadata = {
+export const metadata: Metadata = buildPageMetadata({
   title: 'Duas Leituras',
   description: DESCRIPTION,
-};
+  path: '/duas-leituras',
+});
 
 export default async function TwoPerspectivesArchivePage() {
   const entries = await getAllTwoPerspectives();

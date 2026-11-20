@@ -3,10 +3,11 @@ import type { Metadata } from 'next';
 import { AuthorCard } from '@/components/cards/AuthorCard';
 import { InstitutionalPage } from '@/components/layout/InstitutionalPage';
 import { getAuthors, getPage } from '@/content';
+import { buildPageMetadata } from '@/lib/seo';
 
 export async function generateMetadata(): Promise<Metadata> {
   const page = await getPage('sobre');
-  return { title: page.title, description: page.description };
+  return buildPageMetadata({ title: page.title, description: page.description, path: '/sobre' });
 }
 
 /** The publication, its name and philosophy, then both authors. */
