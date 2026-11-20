@@ -1,3 +1,6 @@
+import Image from 'next/image';
+
+import type { ImageAsset } from '@/content';
 import { classNames } from '@/lib/class-names';
 
 /** Image ratios from the design system (section 5). */
@@ -15,32 +18,69 @@ const ASPECT_RATIO_CLASS_NAMES: Record<CoverAspectRatio, string> = {
 
 /**
  * What fills a cover slot.
- * - `placeholder`: beige box with a caption, for demonstration content only.
+ * - `image`: a licensed image from the content layer.
  * - `fallback`: typographic cover for articles without a licensed image.
- * Licensed images (`next/image`) join this union with the content layer in Stage 3.
+ * - `placeholder`: beige box with a caption, used only by the component preview page.
  */
 export type CoverSource =
-  { kind: 'placeholder'; caption: string } | { kind: 'fallback'; title: string; kicker?: string };
+  | { kind: 'image'; image: ImageAsset }
+  | { kind: 'fallback'; title: string; kicker?: string }
+  | { kind: 'placeholder'; caption: string };
 
 type CoverProps = {
   source: CoverSource;
   aspectRatio: CoverAspectRatio;
+  /** `sizes` for the responsive image, e.g. "(min-width: 1024px) 400px, 100vw". */
+  sizes?: string;
+  /** Loads the image eagerly; use for the largest image above the fold. */
+  isPriority?: boolean;
   /** Adds the 24px L-shaped frame marks, offset 8px outside the image. */
   withCropMarks?: boolean;
   className?: string;
 };
 
-export function Cover({ source, aspectRatio, withCropMarks = false, className }: CoverProps) {
+export function Cover({
+  source,
+  aspectRatio,
+  sizes = '100vw',
+  isPriority = false,
+  withCropMarks = false,
+  className,
+}: CoverProps) {
   return (
     <div className={classNames('relative', ASPECT_RATIO_CLASS_NAMES[aspectRatio], className)}>
-      {source.kind === 'placeholder' ? (
-        <PlaceholderCover caption={source.caption} />
-      ) : (
-        <FallbackCover title={source.title} kicker={source.kicker} />
-      )}
+      <CoverContent source={source} sizes={sizes} isPriority={isPriority} />
       {withCropMarks && <CropMarks />}
     </div>
   );
+}
+
+function CoverContent({
+  source,
+  sizes,
+  isPriority,
+}: {
+  source: CoverSource;
+  sizes: string;
+  isPriority: boolean;
+}) {
+  switch (source.kind) {
+    case 'image':
+      return (
+        <Image
+          src={source.image.src}
+          alt={source.image.alt}
+          fill
+          sizes={sizes}
+          preload={isPriority}
+          className="bg-line object-cover"
+        />
+      );
+    case 'fallback':
+      return <FallbackCover title={source.title} kicker={source.kicker} />;
+    case 'placeholder':
+      return <PlaceholderCover caption={source.caption} />;
+  }
 }
 
 function PlaceholderCover({ caption }: { caption: string }) {

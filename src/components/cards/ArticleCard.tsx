@@ -6,8 +6,8 @@ import { Kicker } from '@/components/ui/Kicker';
 import type { PlainDate } from '@/lib/dates';
 
 /**
- * What a card needs to show an article. Presentational on purpose: the content layer
- * (Stage 3) maps its `ArticleSummary` domain type to this shape.
+ * What a card needs to show an article. Presentational on purpose: `toArticleCardData`
+ * (article-card-data.ts) maps the content layer's `ArticleSummary` to this shape.
  */
 export type ArticleCardData = {
   href: string;
