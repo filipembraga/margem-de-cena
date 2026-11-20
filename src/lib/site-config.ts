@@ -1,10 +1,15 @@
-import { getCategoryDefinition, getCategoryPath, type Category } from './categories';
+import {
+  getCategoryDefinition,
+  getCategoryPath,
+  type Category,
+  type ContentSection,
+} from './categories';
 
 export type NavigationItem = {
   label: string;
   href: string;
-  /** Set when the item belongs to a category, so empty sections can be hidden later. */
-  category?: Category;
+  /** Set when the item lists content, so the item is hidden while the section is empty. */
+  section?: ContentSection;
 };
 
 export type SiteConfig = {
@@ -33,7 +38,7 @@ function categoryNavigationItem(category: Category): NavigationItem {
   return {
     label: getCategoryDefinition(category).pluralLabel,
     href: getCategoryPath(category),
-    category,
+    section: category,
   };
 }
 
@@ -42,7 +47,7 @@ export const primaryNavigation: NavigationItem[] = [
   categoryNavigationItem('film'),
   categoryNavigationItem('book'),
   categoryNavigationItem('series'),
-  { label: 'Duas Leituras', href: '/duas-leituras' },
+  { label: 'Duas Leituras', href: '/duas-leituras', section: 'two-perspectives' },
   categoryNavigationItem('essay'),
   { label: 'Sobre', href: '/sobre' },
 ];
@@ -54,6 +59,16 @@ export const footerNavigation: NavigationItem[] = [
   { label: 'Privacidade', href: '/privacidade' },
   { label: 'Créditos', href: '/creditos' },
 ];
+
+/** Leaves out the items of sections that have nothing published yet. */
+export function withoutEmptySections(
+  items: NavigationItem[],
+  sectionsWithContent: ReadonlySet<ContentSection>,
+): NavigationItem[] {
+  return items.filter(
+    (item) => item.section === undefined || sectionsWithContent.has(item.section),
+  );
+}
 
 /** Builds the public Instagram profile URL from a handle. */
 export function getInstagramUrl(handle: string): string {
