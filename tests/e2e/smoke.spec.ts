@@ -44,10 +44,15 @@ test.describe('links', () => {
   test('a Duas Leituras article links to the other reading', async ({ page }) => {
     await page.goto('/filmes/a-mare-que-nao-volta');
 
-    await page.getByRole('link', { name: 'O que a gente deixa nos cômodos' }).click();
+    const companion = page.getByRole('region', { name: 'A outra leitura' });
+    await companion.getByRole('link', { name: 'O que a gente deixa nos cômodos' }).click();
 
     await expect(page).toHaveURL('/filmes/o-que-a-gente-deixa-nos-comodos');
-    await expect(page.getByRole('link', { name: 'A maré que não volta' })).toBeVisible();
+    await expect(
+      page
+        .getByRole('region', { name: 'A outra leitura' })
+        .getByRole('link', { name: 'A maré que não volta' }),
+    ).toBeVisible();
   });
 
   test('an inline tag mention opens the tag page', async ({ page }) => {

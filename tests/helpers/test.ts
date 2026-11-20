@@ -49,12 +49,14 @@ export const PAGES = [
   { path: '/filmes', name: 'arquivo de categoria' },
   { path: '/ensaios', name: 'arquivo de ensaios' },
   { path: '/filmes/a-mare-que-nao-volta', name: 'página de artigo' },
+  { path: '/livros/a-gaveta-como-arquitetura-do-romance', name: 'artigo com imagem no texto' },
   { path: '/duas-leituras', name: 'arquivo de Duas Leituras' },
   { path: '/duas-leituras/a-casa-das-mares', name: 'página de Duas Leituras' },
   { path: '/autores/filipe-braga', name: 'página de autor' },
   { path: '/tags/memoria', name: 'página de etiqueta' },
   { path: '/sobre', name: 'página Sobre' },
   { path: '/privacidade', name: 'página institucional' },
+  { path: '/busca', name: 'página de busca' },
   { path: '/componentes', name: 'prévia de componentes' },
 ] as const;
 
