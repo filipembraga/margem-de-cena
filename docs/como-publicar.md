@@ -1,7 +1,7 @@
 # Como publicar na Margem de Cena
 
 Guia para quem escreve. Explica onde cada texto fica, quais campos preencher e como usar os
-recursos do texto (etiquetas, notas de margem, destaques). Não é preciso saber programar: os
+recursos do texto (etiquetas, notas de margem, spoilers, imagens). Não é preciso saber programar: os
 textos são arquivos de texto simples, e o site avisa quando algo está faltando.
 
 ## Onde fica cada coisa
@@ -63,10 +63,10 @@ A escolha de <Tag>enquadramento</Tag> fixo transforma o espaço em <Tag>memória
 | `authors` | sim | um ou dois autores: `filipe-braga`, `adriana-guimaraes` |
 | `status` | sim | `published` para publicar. Veja [Rascunhos](#rascunhos) |
 | `publishedAt` | sim | data de publicação, no formato `AAAA-MM-DD` |
-| `updatedAt` | não | data da última revisão relevante |
+| `updatedAt` | não | data da última revisão relevante. Aparece como "Atualizado em …" abaixo da data |
 | `tags` | não | etiquetas extras, que não aparecem marcadas no texto (veja [Etiquetas](#etiquetas)) |
 | `featured` | não | `true` para ser o destaque da página inicial. Só um texto por vez |
-| `spoilerWarning` | não | `true` mostra um aviso de spoiler abaixo do nome do autor |
+| `spoilerWarning` | não | `true` mostra, abaixo do nome do autor, o aviso de que o texto comenta a trama. Os trechos com spoiler são marcados com [`<Spoiler>`](#spoiler-spoiler) |
 | `cover` | não | imagem de capa (veja [Imagens](#imagens)). Sem capa, o site usa uma capa tipográfica com o nome da obra |
 | `references` | não | lista de "Notas e referências" do fim do texto |
 
@@ -90,8 +90,8 @@ Não use `#` sozinho: o título do texto já ocupa esse nível.
 
 ## Recursos do texto
 
-Além do Markdown, há quatro marcações. Elas se escrevem como etiquetas, com abertura e
-fechamento.
+Além do Markdown, há seis marcações. Elas se escrevem como etiquetas, com abertura e
+fechamento (`<Spoiler>...</Spoiler>`), exceto a imagem, que se fecha sozinha (`<Figure ... />`).
 
 ### Etiquetas: `<Tag>`
 
@@ -142,8 +142,48 @@ a nota colada ao ponto do texto a que ela se refere. A numeração é automátic
 A moldura continua lá, esperando.<MarginNote>Repare na porta entreaberta.</MarginNote>
 ```
 
-Outras marcações, código entre chaves `{...}` e imagens no meio do texto não são aceitos por
-enquanto. O site avisa se encontrar algum.
+### Spoiler: `<Spoiler>`
+
+Esconde um trecho até o leitor clicar em "Revelar trecho". Use para o que revela a trama
+(o final, uma reviravolta). Escreva a marcação em linhas próprias, com uma linha em branco
+antes e depois do trecho, e diga em `description` o que o trecho revela:
+
+```mdx
+<Spoiler description="O próximo trecho comenta o plano final do filme.">
+
+No último plano, a câmera volta à cozinha da primeira cena.
+
+</Spoiler>
+```
+
+- Sem `description`, o aviso diz "O próximo trecho revela pontos importantes da trama."
+- O trecho pode ter vários parágrafos, etiquetas e notas de margem.
+- Um spoiler não pode ficar dentro de outro.
+- Esconda só o trecho, nunca o texto inteiro. Se o texto todo comenta a trama, use também
+  `spoilerWarning: true` no frontmatter.
+
+### Imagem: `<Figure>`
+
+Uma imagem no meio do texto, com legenda. Escreva-a em um parágrafo próprio, com os
+atributos em linhas separadas se preferir:
+
+```mdx
+<Figure
+  src="/images/obras/a-casa-das-mares-cozinha.jpg"
+  alt="Uma mesa posta para uma pessoa, numa cozinha iluminada pela janela."
+  caption="A cozinha no último plano do filme."
+  credit="Foto de Fulana de Tal"
+  license="CC BY 4.0"
+/>
+```
+
+- `src`, `alt`, `credit` e `license` são obrigatórios; `caption` (a legenda) é opcional.
+- A imagem aparece no tamanho natural dela, sem ser cortada: uma capa de livro continua
+  vertical. Ela nunca passa da largura do texto.
+- As regras de [Imagens](#imagens) valem aqui também.
+
+Outras marcações e código entre chaves `{...}` não são aceitos. Imagens em Markdown
+(`![...](...)`) também não: use `<Figure>`. O site avisa se encontrar algum.
 
 ## Obras
 
@@ -209,7 +249,8 @@ Séries), e cada um ganha um link para a outra leitura.
 ## Imagens
 
 Coloque o arquivo em `public/images/` (por exemplo, `public/images/obras/a-casa-das-mares.jpg`)
-e descreva-o no campo `cover` do texto ou da obra:
+e descreva-o no campo `cover` do texto ou da obra, ou numa [`<Figure>`](#imagem-figure) no
+meio do texto:
 
 ```yaml
 cover:
@@ -265,6 +306,21 @@ Para ver também o conteúdo de demonstração, rode `SHOW_DEMO_CONTENT=true pnp
    pull request for aceito, o texto vai para o ar.
 
 Na dúvida em qualquer passo, fale com o Filipe.
+
+## O que o site faz sozinho
+
+Não é preciso escrever nada disto:
+
+- **Tempo de leitura**, calculado pelo tamanho do texto.
+- **Lista de etiquetas** do fim do texto, a partir das marcações `<Tag>` e do campo `tags`.
+- **"Leia também"**: três textos próximos deste (mesma obra, etiquetas em comum, mesma
+  categoria), completados pelos mais recentes.
+- **Anterior e próximo**: os textos publicados logo antes e logo depois, em qualquer seção.
+- **Botões de compartilhar** (copiar link, WhatsApp, Threads e e-mail).
+- **Imagem de compartilhamento**: quando alguém compartilha o link, aparece um cartão com a
+  categoria, o título, a autoria e a data, nas fontes do site.
+- **Busca**: o texto entra na busca do site pelo título, pela obra, pela autoria, pelas
+  etiquetas e pelo resumo.
 
 ## Seções vazias
 
