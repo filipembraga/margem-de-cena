@@ -35,6 +35,8 @@ jobs:
       - run: pnpm lint
       - run: pnpm format:check
       - run: pnpm test
+      - name: Reject committed drafts
+        run: pnpm check:drafts
       - name: Lint commit messages
         if: github.event_name == 'pull_request'
         run: >
@@ -56,6 +58,8 @@ jobs:
       - run: pnpm build
         env:
           SHOW_DEMO_CONTENT: 'false'
+      - name: Check that no demonstration content reached the build
+        run: pnpm verify:production-build
 
   e2e:
     name: Smoke and accessibility tests (demo content)
