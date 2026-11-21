@@ -53,6 +53,27 @@ export type PageMetadataInput = {
   isHiddenFromSearchEngines?: boolean;
 };
 
+type RobotsInput = {
+  isHiddenFromSearchEngines: boolean;
+  /** True only on the Vercel production deployment (ADR 0004). */
+  isProductionDeployment: boolean;
+};
+
+/**
+ * The page's single `robots` directive. It is set here, per page, and never in the root
+ * layout: Next adds its own `noindex` to the 404 page, and a layout value would make it a
+ * second, contradictory tag.
+ */
+export function getRobotsDirective({
+  isHiddenFromSearchEngines,
+  isProductionDeployment,
+}: RobotsInput): NonNullable<Metadata['robots']> {
+  if (!isProductionDeployment) {
+    return { index: false, follow: false };
+  }
+  return isHiddenFromSearchEngines ? { index: false, follow: true } : { index: true, follow: true };
+}
+
 export function buildPageMetadata({
   title,
   description,
@@ -91,8 +112,9 @@ export function buildPageMetadata({
         }
       : { ...openGraphBase, type: 'website' },
     twitter: { card: 'summary_large_image', title: shareTitle, description, ...shareImages },
-    ...(isHiddenFromSearchEngines && {
-      robots: { index: false, follow: environment.isVercelProduction },
+    robots: getRobotsDirective({
+      isHiddenFromSearchEngines,
+      isProductionDeployment: environment.isVercelProduction,
     }),
   };
 }

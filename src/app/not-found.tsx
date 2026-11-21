@@ -5,9 +5,9 @@ import { SiteHeader } from '@/components/layout/SiteHeader';
 import { ButtonLink } from '@/components/ui/Button';
 import { EmptyState } from '@/components/ui/EmptyState';
 
+// No `robots` here: Next adds `noindex` to every not-found response on its own.
 export const metadata: Metadata = {
   title: 'Página não encontrada',
-  robots: { index: false },
 };
 
 export default function NotFoundPage() {
