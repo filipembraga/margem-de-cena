@@ -14,6 +14,8 @@ export type NavigationItem = {
 
 export type SiteConfig = {
   name: string;
+  /** Title of the home page in search results and share cards: the name and what it covers. */
+  homeTitle: string;
   tagline: string;
   description: string;
   /** Short line shown in the top strip of the home page. */
@@ -29,6 +31,7 @@ export type SiteConfig = {
 
 export const siteConfig: SiteConfig = {
   name: 'Margem de Cena',
+  homeTitle: 'Margem de Cena: leituras de cinema, literatura e televisão',
   tagline: 'Histórias que permanecem. Leituras que se encontram.',
   description:
     'Publicação cultural independente sobre cinema, literatura e televisão: leituras, ensaios e duas perspectivas sobre a mesma obra.',
