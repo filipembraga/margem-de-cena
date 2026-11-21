@@ -14,7 +14,7 @@ const environmentVariablesSchema = z.object({
 export type Environment = {
   /** Public base URL, used for canonical URLs, Open Graph and the sitemap. */
   siteUrl: URL;
-  /** Whether demonstration content and the component preview are visible. */
+  /** Whether demonstration content and the styleguide are visible. */
   showDemoContent: boolean;
   /** True only for the Vercel production deployment. */
   isVercelProduction: boolean;

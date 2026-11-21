@@ -18,15 +18,15 @@ pnpm install
 SHOW_DEMO_CONTENT=true pnpm dev
 ```
 
-Open http://localhost:3000. With demo content enabled, the component preview is at
-http://localhost:3000/componentes.
+Open http://localhost:3000. With demo content enabled, the styleguide is at
+http://localhost:3000/styleguide.
 
 ### Environment variables
 
 | Variable               | Default                 | Purpose                                                                                                       |
 | ---------------------- | ----------------------- | ------------------------------------------------------------------------------------------------------------- |
 | `NEXT_PUBLIC_SITE_URL` | `http://localhost:3000` | Public base URL for canonical URLs, Open Graph, structured data and the sitemap. Set it to the final domain in production. |
-| `SHOW_DEMO_CONTENT`    | `false`                 | Shows demonstration content and the component preview. Local and Vercel Preview only; the build fails if it is `true` in production. |
+| `SHOW_DEMO_CONTENT`    | `false`                 | Shows demonstration content and the styleguide (`/styleguide`). Local and Vercel Preview only; the build fails if it is `true` in production. |
 
 ## Scripts
 

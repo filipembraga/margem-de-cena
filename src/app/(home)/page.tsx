@@ -113,8 +113,8 @@ function EmptyHomePage() {
         description="Os primeiros textos da Margem de Cena chegam em breve."
         action={
           environment.showDemoContent ? (
-            <ButtonLink href="/componentes" variant="secondary">
-              Ver componentes
+            <ButtonLink href="/styleguide" variant="secondary">
+              Ver guia de estilo
             </ButtonLink>
           ) : undefined
         }
