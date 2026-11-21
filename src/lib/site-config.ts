@@ -76,6 +76,24 @@ export function withoutEmptySections(
   );
 }
 
+/** Shown in place of the contact e-mail while it does not exist, outside production only. */
+export const CONTACT_EMAIL_PLACEHOLDER = '[A PREENCHER: e-mail]';
+
+/**
+ * The footer's line: "Publicação cultural independente · contato@…". Without an e-mail, local
+ * and preview builds show a placeholder as a reminder, and production leaves the e-mail out,
+ * so a placeholder never goes live.
+ */
+export function getFooterContactLine(
+  contactEmail: string | null,
+  isProductionDeployment: boolean,
+): string {
+  const contact = contactEmail ?? (isProductionDeployment ? null : CONTACT_EMAIL_PLACEHOLDER);
+  return contact === null
+    ? 'Publicação cultural independente'
+    : `Publicação cultural independente · ${contact}`;
+}
+
 /** Builds the public Instagram profile URL from a handle. */
 export function getInstagramUrl(handle: string): string {
   return `https://www.instagram.com/${handle}/`;

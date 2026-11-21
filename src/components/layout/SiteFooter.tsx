@@ -1,12 +1,15 @@
 import Link from 'next/link';
 
 import { getSectionsWithContent } from '@/content';
-import { footerNavigation, siteConfig, withoutEmptySections } from '@/lib/site-config';
+import { environment } from '@/lib/env';
+import {
+  footerNavigation,
+  getFooterContactLine,
+  siteConfig,
+  withoutEmptySections,
+} from '@/lib/site-config';
 
 import { Wordmark } from './Wordmark';
-
-/** Visible placeholder until the authors provide a contact address. */
-const CONTACT_EMAIL_PLACEHOLDER = '[A PREENCHER: e-mail]';
 
 export async function SiteFooter() {
   const currentYear = new Date().getFullYear();
@@ -32,9 +35,7 @@ export async function SiteFooter() {
         </nav>
       </div>
       <div className="flex flex-wrap justify-between gap-3 border-t border-line pt-4 type-meta-small text-muted">
-        <p>
-          Publicação cultural independente · {siteConfig.contactEmail ?? CONTACT_EMAIL_PLACEHOLDER}
-        </p>
+        <p>{getFooterContactLine(siteConfig.contactEmail, environment.isVercelProduction)}</p>
         <p>
           © {currentYear} {siteConfig.name}
         </p>
