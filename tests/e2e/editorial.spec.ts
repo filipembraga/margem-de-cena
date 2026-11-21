@@ -36,6 +36,58 @@ test.describe('share bar', () => {
     expect(new URL(copiedText).pathname).toBe(ARTICLE_PATH);
   });
 
+  test('hides the Instagram button when the browser cannot share files', async ({ page }) => {
+    await page.addInitScript(() => {
+      Object.defineProperty(navigator, 'canShare', { value: () => false, configurable: true });
+    });
+    await page.goto(ARTICLE_PATH);
+
+    await expect(
+      page.getByRole('region', { name: 'Compartilhar' }).getByRole('button', { name: /Instagram/ }),
+    ).toHaveCount(0);
+  });
+
+  test('shares the Stories image and the link where the browser accepts files', async ({
+    page,
+  }) => {
+    await page.addInitScript(() => {
+      const sharedData: Array<{ files: Array<{ name: string; type: string; size: number }> }> = [];
+      Object.assign(window, { sharedData });
+      Object.defineProperty(navigator, 'canShare', { value: () => true, configurable: true });
+      Object.defineProperty(navigator, 'share', {
+        configurable: true,
+        value: async (data: ShareData) => {
+          sharedData.push({
+            ...data,
+            files: (data.files ?? []).map(({ name, type, size }) => ({ name, type, size })),
+          });
+        },
+      });
+    });
+    await page.goto(ARTICLE_PATH);
+
+    await page
+      .getByRole('region', { name: 'Compartilhar' })
+      .getByRole('button', { name: /Instagram/ })
+      .click();
+
+    await expect
+      .poll(() => page.evaluate(() => (window as unknown as { sharedData: unknown[] }).sharedData))
+      .toEqual([
+        expect.objectContaining({
+          title: 'A maré que não volta',
+          url: expect.stringContaining(ARTICLE_PATH),
+          files: [
+            {
+              name: 'a-mare-que-nao-volta-stories.png',
+              type: 'image/png',
+              size: expect.any(Number),
+            },
+          ],
+        }),
+      ]);
+  });
+
   test('links to WhatsApp with the title and the address', async ({ page }) => {
     await page.goto(ARTICLE_PATH);
 
@@ -149,6 +201,13 @@ test.describe('search engines and sharing', () => {
     ]);
   });
 
+  test('every page has exactly one robots tag', async ({ page }) => {
+    for (const path of ['/', ARTICLE_PATH, '/busca', '/filmes/etiqueta/memoria']) {
+      await page.goto(path);
+      await expect(page.locator('meta[name="robots"]'), path).toHaveCount(1);
+    }
+  });
+
   test('an article has its card in the proportion of an Instagram post', async ({ request }) => {
     const response = await request.get(`${ARTICLE_PATH}/instagram.png`);
 
@@ -157,6 +216,16 @@ test.describe('search engines and sharing', () => {
     // A PNG stores its width and height at bytes 16 to 23.
     const image = await response.body();
     expect([image.readUInt32BE(16), image.readUInt32BE(20)]).toEqual([1080, 1350]);
+  });
+
+  test('an article and a Duas Leituras entry have a Stories image', async ({ request }) => {
+    for (const path of [ARTICLE_PATH, '/duas-leituras/a-casa-das-mares']) {
+      const response = await request.get(`${path}/stories.png`);
+
+      expect(response.headers()['content-type'], path).toBe('image/png');
+      const image = await response.body();
+      expect([image.readUInt32BE(16), image.readUInt32BE(20)], path).toEqual([1080, 1920]);
+    }
   });
 
   test('an archive filtered by a tag stays out of search engines', async ({ page }) => {

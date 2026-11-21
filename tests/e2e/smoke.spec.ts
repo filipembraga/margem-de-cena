@@ -151,6 +151,14 @@ test.describe('not found', () => {
     }
   });
 
+  test('gives the 404 page exactly one robots tag, and it says noindex', async ({ page }) => {
+    await page.goto(UNKNOWN_PATH);
+
+    const robotsTags = page.locator('meta[name="robots"]');
+    await expect(robotsTags).toHaveCount(1);
+    await expect(robotsTags).toHaveAttribute('content', /noindex/);
+  });
+
   test('answers an unknown address with the pt-BR 404 page', async ({ page }) => {
     const response = await page.goto(UNKNOWN_PATH);
 
