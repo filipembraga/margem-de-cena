@@ -51,6 +51,7 @@ Each significant choice has an architecture decision record in [`docs/adr/`](doc
 | [0009](docs/adr/0009-seo-metadata-and-open-graph-images.md) | SEO metadata, structured data and generated share images |
 | [0010](docs/adr/0010-images-in-the-body-and-image-dimensions.md) | Images in the body, measured at build time |
 | [0011](docs/adr/0011-static-category-archive-pages-and-tag-filters.md) | Static archive pages with pagination and tag filters |
+| [0012](docs/adr/0012-instagram-sharing-through-the-system-share-sheet.md) | Instagram sharing through the system share sheet, without a link or SDK |
 
 ## Running locally
 
@@ -107,8 +108,11 @@ The first end-to-end run needs a browser: `pnpm exec playwright install chromium
    `VERCEL_ENV` is set by Vercel. Only `production` opens the site to search engines
    (`robots.txt` and the `robots` meta tag); previews stay `noindex`.
 3. Production deploys from `main`; every pull request gets a preview deployment.
-4. Before launch: set the final domain, run `pnpm check:placeholders --strict`, and set the
-   publication's contact e-mail and Instagram handle in `src/lib/site-config.ts`.
+4. Before launch:
+   - set the final domain;
+   - replace every `[A PREENCHER: …]` text (`pnpm check:placeholders` lists them). The
+     production build fails while any is left in published content or author data;
+   - set the publication's contact e-mail and Instagram handle in `src/lib/site-config.ts`.
 
 The Node.js version comes from `package.json#engines`. If the build image does not offer
 pnpm 12, add `ENABLE_EXPERIMENTAL_COREPACK=1` so Vercel uses the version pinned in

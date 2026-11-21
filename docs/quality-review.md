@@ -61,7 +61,7 @@ manual review also confirmed:
 | The home page title was only "Margem de Cena", with nothing on what the site covers | **Fixed.** It is now "Margem de Cena: leituras de cinema, literatura e televisão" (`siteConfig.homeTitle`), also used in its share card. |
 | The search page (`/busca`) was indexable. Internal search result pages are thin and have endless variations | **Fixed.** It is now `noindex`. The articles it finds are indexed on their own pages. |
 | Hidden pages (styleguide, search, filtered archives) were `noindex, nofollow` | **Fixed.** On production they are now `noindex, follow`, so their links still help crawlers. Outside production everything stays `nofollow`. |
-| The 404 page carries two `robots` tags: one added by Next.js and one of ours | **Kept on purpose.** Ours overrides the layout's `index, follow`; without it, production would send contradictory tags. Both say `noindex`. |
+| The 404 page carried two `robots` tags: the `noindex` Next.js adds and the one inherited from the layout | **Fixed at the source.** The layout no longer sets `robots`; every page sets exactly one through `buildPageMetadata`, and the 404 keeps only Next's `noindex`. An e2e test checks for exactly one tag. |
 
 Already in place from Stage 4:
 

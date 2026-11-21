@@ -317,13 +317,21 @@ Não é preciso escrever nada disto:
 - **"Leia também"**: três textos próximos deste (mesma obra, etiquetas em comum, mesma
   categoria), completados pelos mais recentes.
 - **Anterior e próximo**: os textos publicados logo antes e logo depois, em qualquer seção.
-- **Botões de compartilhar** (copiar link, WhatsApp, Threads e e-mail).
+- **Botões de compartilhar** (copiar link, WhatsApp, Threads e e-mail). No celular, aparece
+  também o botão **Instagram**: ele abre o menu de compartilhar do aparelho com a imagem de
+  Stories e o link do texto; é só escolher o Instagram e publicar. O botão só aparece nos
+  navegadores que conseguem compartilhar imagens (em geral, os de celular).
 - **Imagem de compartilhamento**: quando alguém compartilha o link, aparece um cartão com a
   categoria, o título, a autoria e a data, nas fontes do site.
 - **Imagem para o Instagram**: o mesmo cartão, no formato de post do Instagram (1080 × 1350).
   Para baixar, acrescente `/instagram.png` ao endereço do texto, por exemplo
   `margemdecena…/filmes/a-mare-que-nao-volta/instagram.png`. Funciona também nas entradas de
   Duas Leituras (`margemdecena…/duas-leituras/a-casa-das-mares/instagram.png`).
+- **Imagem para os Stories**: o mesmo cartão, no formato dos Stories (1080 × 1920). O texto
+  fica longe do topo e da base, onde o Instagram põe o nome do perfil e o campo de resposta.
+  Para baixar, acrescente `/stories.png` ao endereço do texto ou da entrada de Duas Leituras.
+  Nos Stories, use a figurinha de link para levar ao texto: o Instagram não deixa links
+  clicáveis dentro da imagem.
 - **Páginas da seção**: cada seção mostra 12 textos por página, com os botões "Anterior" e
   "Próxima", e as etiquetas mais usadas na seção servem de filtro.
 - **Busca**: o texto entra na busca do site pelo título, pela obra, pela autoria, pelas
@@ -332,7 +340,9 @@ Não é preciso escrever nada disto:
 ## Textos a preencher
 
 Trechos provisórios (bios, páginas Sobre, Contato e Privacidade) ficam marcados como
-`[A PREENCHER: o que falta]`. Para ver a lista do que ainda falta, rode:
+`[A PREENCHER: o que falta]`. **O site publicado não vai ao ar enquanto houver um marcador**
+em um texto publicado, numa página ou nos dados dos autores: a publicação falha e mostra cada
+trecho com o arquivo e a linha. Para ver a lista do que ainda falta, rode:
 
 ```sh
 pnpm check:placeholders
