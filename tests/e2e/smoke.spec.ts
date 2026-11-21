@@ -19,6 +19,65 @@ test.describe('pages', () => {
   }
 });
 
+/** The main sections, in header order, with the h1 each one shows. */
+const MAIN_SECTIONS = [
+  { link: 'Filmes', path: '/filmes', heading: 'Filmes' },
+  { link: 'Livros', path: '/livros', heading: 'Livros' },
+  { link: 'Séries', path: '/series', heading: 'Séries' },
+  { link: 'Duas Leituras', path: '/duas-leituras', heading: 'Duas Leituras' },
+  { link: 'Ensaios', path: '/ensaios', heading: 'Ensaios' },
+  { link: 'Sobre', path: '/sobre', heading: 'Sobre' },
+] as const;
+
+test.describe('navigation', () => {
+  test('the header reaches every main section and comes back home', async ({ page }) => {
+    const isDesktop = (page.viewportSize()?.width ?? 0) >= DESKTOP_BREAKPOINT;
+    await page.goto('/');
+
+    for (const section of MAIN_SECTIONS) {
+      if (isDesktop) {
+        await page
+          .getByRole('navigation', { name: 'Seções' })
+          .getByRole('link', { name: section.link, exact: true })
+          .click();
+      } else {
+        await page.getByRole('button', { name: 'Abrir menu' }).click();
+        await page
+          .getByRole('dialog', { name: 'Menu' })
+          .getByRole('link', { name: section.link, exact: true })
+          .click();
+        await expect(page.getByRole('dialog', { name: 'Menu' })).toBeHidden();
+      }
+
+      await expect(page).toHaveURL(section.path);
+      await expect(page.getByRole('heading', { level: 1 })).toHaveText(section.heading);
+    }
+
+    await page.getByRole('link', { name: 'Margem de Cena — página inicial' }).first().click();
+    await expect(page).toHaveURL('/');
+  });
+
+  test('a reader goes from the home page to an article and to its author', async ({ page }) => {
+    await page.goto('/');
+
+    await page
+      .getByRole('region', { name: 'Em destaque' })
+      .getByRole('heading', { level: 2 })
+      .getByRole('link')
+      .click();
+    await expect(page.locator('article h1')).toBeVisible();
+    const articleTitle = await page.locator('article h1').textContent();
+
+    await page
+      .getByRole('article')
+      .getByRole('link', { name: /Braga|Guimarães/ })
+      .first()
+      .click();
+    await expect(page).toHaveURL(/\/autores\//);
+    await expect(page.getByRole('link', { name: articleTitle ?? '' }).first()).toBeVisible();
+  });
+});
+
 test.describe('links', () => {
   test('every internal link on every page leads to an existing page', async ({ page, request }) => {
     test.skip(
