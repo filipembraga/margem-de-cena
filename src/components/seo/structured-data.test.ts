@@ -4,7 +4,12 @@ import { buildCatalog } from '@/content/catalog';
 import { articleInput, contentWith } from '@/content/testing/fixtures';
 import { createInMemorySource } from '@/content/testing/in-memory-source';
 
-import { buildArticleStructuredData, buildWebsiteStructuredData } from './structured-data';
+import {
+  buildArticleStructuredData,
+  buildBreadcrumbStructuredData,
+  buildWebsiteStructuredData,
+  getArticleBreadcrumbs,
+} from './structured-data';
 
 const SITE_URL = new URL('https://margemdecena.example');
 
@@ -51,6 +56,38 @@ describe('buildWebsiteStructuredData', () => {
     expect(data.potentialAction).toMatchObject({
       '@type': 'SearchAction',
       target: 'https://margemdecena.example/busca?q={search_term_string}',
+    });
+  });
+});
+
+describe('buildBreadcrumbStructuredData', () => {
+  it("lists an article's trail from the home page, with absolute URLs", async () => {
+    const source = createInMemorySource(contentWith({ articles: [articleInput('a-mare')] }));
+    const [article] = (await buildCatalog(source, { includeDemo: false })).articles;
+    if (!article) {
+      throw new Error('The sample article is missing.');
+    }
+
+    const data = buildBreadcrumbStructuredData(getArticleBreadcrumbs(article), SITE_URL);
+
+    expect(data).toEqual({
+      '@context': 'https://schema.org',
+      '@type': 'BreadcrumbList',
+      itemListElement: [
+        { '@type': 'ListItem', position: 1, name: 'Início', item: 'https://margemdecena.example/' },
+        {
+          '@type': 'ListItem',
+          position: 2,
+          name: 'Filmes',
+          item: 'https://margemdecena.example/filmes',
+        },
+        {
+          '@type': 'ListItem',
+          position: 3,
+          name: 'Título de a-mare',
+          item: 'https://margemdecena.example/filmes/a-mare',
+        },
+      ],
     });
   });
 });

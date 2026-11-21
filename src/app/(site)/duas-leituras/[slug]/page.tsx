@@ -8,6 +8,8 @@ import {
   getPerspectiveAuthorNames,
   PERSPECTIVE_NUMERALS,
 } from '@/components/two-perspectives/two-perspectives-labels';
+import { JsonLd } from '@/components/seo/JsonLd';
+import { buildBreadcrumbStructuredData, HOME_BREADCRUMB } from '@/components/seo/structured-data';
 import { Cover } from '@/components/ui/Cover';
 import { DemoLabel } from '@/components/ui/DemoLabel';
 import { Kicker } from '@/components/ui/Kicker';
@@ -19,6 +21,7 @@ import {
 } from '@/content';
 import { getCategoryDefinition } from '@/lib/categories';
 import { formatShortDate, toDateTimeAttribute } from '@/lib/dates';
+import { environment } from '@/lib/env';
 import { buildPageMetadata } from '@/lib/seo';
 
 type TwoPerspectivesPageProps = {
@@ -57,8 +60,15 @@ export default async function TwoPerspectivesPage({ params }: TwoPerspectivesPag
     (otherEntry) => otherEntry.slug !== entry.slug,
   );
 
+  const breadcrumbs = [
+    HOME_BREADCRUMB,
+    { name: 'Duas Leituras', path: '/duas-leituras' },
+    { name: entry.work.title, path: entry.path },
+  ];
+
   return (
     <>
+      <JsonLd data={buildBreadcrumbStructuredData(breadcrumbs, environment.siteUrl)} />
       <div className="page-container pt-14 pb-22 lg:pt-18">
         <header className="grid items-center gap-x-12 gap-y-10 md:grid-cols-[minmax(0,18.75rem)_minmax(0,1fr)]">
           <Cover

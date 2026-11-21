@@ -11,7 +11,11 @@ import { WorkInfo } from '@/components/article/WorkInfo';
 import { getArticleCoverSource } from '@/components/cards/article-card-data';
 import { ArticleBody } from '@/components/mdx/ArticleBody';
 import { JsonLd } from '@/components/seo/JsonLd';
-import { buildArticleStructuredData } from '@/components/seo/structured-data';
+import {
+  buildArticleStructuredData,
+  buildBreadcrumbStructuredData,
+  getArticleBreadcrumbs,
+} from '@/components/seo/structured-data';
 import { Cover } from '@/components/ui/Cover';
 import {
   getAdjacentArticles,
@@ -79,6 +83,9 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
   return (
     <div className="pb-22">
       <JsonLd data={buildArticleStructuredData(article, environment.siteUrl)} />
+      <JsonLd
+        data={buildBreadcrumbStructuredData(getArticleBreadcrumbs(article), environment.siteUrl)}
+      />
       <article>
         <ArticleHeader article={article} />
         <ArticleCover article={article} />
