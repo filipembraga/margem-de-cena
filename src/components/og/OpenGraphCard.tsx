@@ -1,12 +1,57 @@
 import { DISPLAY_FONT_FAMILY, INTERFACE_FONT_FAMILY } from './open-graph-fonts';
 
 /**
- * The image shown when a page is shared (1200 × 630), rendered by `next/og` at build time.
+ * The share card, rendered by `next/og` at build time in two formats:
+ * - `link-preview` (1200 × 630): the image shown when a link is shared;
+ * - `instagram-post` (1080 × 1350, 4:5): the same card for the authors to post on Instagram.
+ *
  * `next/og` supports inline styles only, without CSS variables, so the light theme tokens
  * from globals.css are repeated here.
  */
 
-export const OPEN_GRAPH_IMAGE_SIZE = { width: 1200, height: 630 };
+export type ShareCardFormat = 'link-preview' | 'instagram-post';
+
+type ShareCardLayout = {
+  width: number;
+  height: number;
+  padding: string;
+  ruleGap: number;
+  wordmarkSize: number;
+  kickerSize: number;
+  titleSize: { short: number; long: number };
+  footerSize: number;
+};
+
+const SHARE_CARD_LAYOUTS: Record<ShareCardFormat, ShareCardLayout> = {
+  'link-preview': {
+    width: 1200,
+    height: 630,
+    padding: '64px 80px',
+    ruleGap: 44,
+    wordmarkSize: 40,
+    kickerSize: 20,
+    titleSize: { short: 78, long: 60 },
+    footerSize: 22,
+  },
+  'instagram-post': {
+    width: 1080,
+    height: 1350,
+    padding: '96px 88px',
+    ruleGap: 48,
+    wordmarkSize: 48,
+    kickerSize: 24,
+    titleSize: { short: 104, long: 80 },
+    footerSize: 28,
+  },
+};
+
+/** Pixel size of a share card format, for `ImageResponse` and the `size` export of a route. */
+export function getShareCardSize(format: ShareCardFormat): { width: number; height: number } {
+  const { width, height } = SHARE_CARD_LAYOUTS[format];
+  return { width, height };
+}
+
+export const OPEN_GRAPH_IMAGE_SIZE = getShareCardSize('link-preview');
 
 const COLORS = {
   background: '#f4f0e8', // --bg
@@ -19,7 +64,7 @@ const COLORS = {
 const LONG_TITLE_LENGTH = 60;
 const MAXIMUM_TITLE_LENGTH = 110;
 
-type OpenGraphCardProps = {
+export type ShareCardContent = {
   /** Small uppercase line above the title, e.g. "Filmes · A casa das marés". */
   kicker?: string;
   title: string;
@@ -27,6 +72,10 @@ type OpenGraphCardProps = {
   footer: string;
   /** The title in display italic, as on the site's typographic covers and the tagline. */
   isTitleItalic?: boolean;
+};
+
+type OpenGraphCardProps = ShareCardContent & {
+  format?: ShareCardFormat;
 };
 
 function shortenTitle(title: string): string {
@@ -41,8 +90,11 @@ export function OpenGraphCard({
   title,
   footer,
   isTitleItalic = false,
+  format = 'link-preview',
 }: OpenGraphCardProps) {
-  const titleFontSize = title.length > LONG_TITLE_LENGTH ? 60 : 78;
+  const layout = SHARE_CARD_LAYOUTS[format];
+  const titleFontSize =
+    title.length > LONG_TITLE_LENGTH ? layout.titleSize.long : layout.titleSize.short;
 
   return (
     <div
@@ -50,7 +102,7 @@ export function OpenGraphCard({
         width: '100%',
         height: '100%',
         display: 'flex',
-        padding: '64px 80px',
+        padding: layout.padding,
         backgroundColor: COLORS.background,
         color: COLORS.foreground,
       }}
@@ -62,7 +114,7 @@ export function OpenGraphCard({
           flexDirection: 'column',
           justifyContent: 'space-between',
           borderLeft: `3px solid ${COLORS.accent}`,
-          paddingLeft: 44,
+          paddingLeft: layout.ruleGap,
         }}
       >
         <div
@@ -70,7 +122,7 @@ export function OpenGraphCard({
             display: 'flex',
             fontFamily: DISPLAY_FONT_FAMILY,
             fontWeight: 500,
-            fontSize: 40,
+            fontSize: layout.wordmarkSize,
           }}
         >
           <span>Margem</span>
@@ -84,7 +136,7 @@ export function OpenGraphCard({
               style={{
                 fontFamily: INTERFACE_FONT_FAMILY,
                 fontWeight: 600,
-                fontSize: 20,
+                fontSize: layout.kickerSize,
                 letterSpacing: '0.16em',
                 textTransform: 'uppercase',
                 color: COLORS.accent,
@@ -114,7 +166,7 @@ export function OpenGraphCard({
             paddingTop: 20,
             fontFamily: INTERFACE_FONT_FAMILY,
             fontWeight: 400,
-            fontSize: 22,
+            fontSize: layout.footerSize,
             color: COLORS.muted,
           }}
         >

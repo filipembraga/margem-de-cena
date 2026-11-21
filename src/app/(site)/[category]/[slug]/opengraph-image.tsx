@@ -1,11 +1,10 @@
 import { notFound } from 'next/navigation';
 
-import { getArticleKicker } from '@/components/cards/article-card-data';
 import { OPEN_GRAPH_IMAGE_SIZE } from '@/components/og/OpenGraphCard';
 import { renderOpenGraphImage } from '@/components/og/render-open-graph-image';
+import { describeArticleShareCard } from '@/components/og/share-card-content';
 import { getArticle, getPublishedArticles } from '@/content';
 import { findCategoryBySlug, getCategoryDefinition } from '@/lib/categories';
-import { formatLongDate } from '@/lib/dates';
 
 /** An article's share card: category and work, title, authors and date. */
 
@@ -33,10 +32,5 @@ export default async function ArticleOpenGraphImage({ params }: ArticleImageProp
     notFound();
   }
 
-  const authorNames = article.authors.map((author) => author.name).join(' e ');
-  return renderOpenGraphImage({
-    kicker: getArticleKicker(article, { withWork: true }),
-    title: article.title,
-    footer: `Por ${authorNames} · ${formatLongDate(article.publishedAt)}`,
-  });
+  return renderOpenGraphImage(describeArticleShareCard(article));
 }
