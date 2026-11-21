@@ -16,6 +16,7 @@ function toRawRecord(collection: string, input: RecordInput): RawRecord {
     origin: `${folder}/${input.slug}`,
     data: {},
     body: '',
+    bodyLineOffset: 0,
     isDemo: false,
     syntaxError: null,
     ...input,

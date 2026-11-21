@@ -1,8 +1,8 @@
 import { checkIntegrity } from './integrity';
 import { ContentValidationError, type ContentIssue } from './issues';
-import { parseContent, type ParsedContent } from './parse';
+import { parseContent, toFileLine, type ParsedContent } from './parse';
 import { resolveCatalog, type ContentCatalog, type ImageSizes } from './resolve';
-import type { ContentSource } from './source';
+import type { ContentSource, RawRecord } from './source';
 import type { ImageSize } from './types';
 
 /**
@@ -72,6 +72,17 @@ async function measureImages(
   return { imageSizes, issues };
 }
 
+function bodyImageReferences(
+  record: RawRecord,
+  images: Array<{ src: string; line: number | null }>,
+): ImageReference[] {
+  return images.map((image) => ({
+    origin: record.origin,
+    src: image.src,
+    line: toFileLine(image.line, record),
+  }));
+}
+
 function listImageReferences(content: ParsedContent): ImageReference[] {
   const references: ImageReference[] = [];
 
@@ -83,10 +94,10 @@ function listImageReferences(content: ParsedContent): ImageReference[] {
 
   for (const { record, data, body } of content.articles) {
     addImage(record.origin, data.cover);
-    references.push(...body.images.map((image) => ({ origin: record.origin, ...image })));
+    references.push(...bodyImageReferences(record, body.images));
   }
   for (const { record, body } of content.pages) {
-    references.push(...body.images.map((image) => ({ origin: record.origin, ...image })));
+    references.push(...bodyImageReferences(record, body.images));
   }
   for (const { record, data } of content.works) {
     addImage(record.origin, data.cover);

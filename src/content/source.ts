@@ -16,6 +16,11 @@ export type RawRecord = {
   data: unknown;
   /** MDX body, for articles and pages. Empty for data-only records. */
   body: string;
+  /**
+   * Lines in the stored file before the body (the frontmatter block). Added to every line
+   * number found in the body, so messages point to the line an author sees in the file.
+   */
+  bodyLineOffset: number;
   /** True for records under `content/demo/`. */
   isDemo: boolean;
   /** Set when the stored data could not be read at all (for example, broken YAML). */
