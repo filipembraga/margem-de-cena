@@ -99,7 +99,11 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
           <div className="flex min-w-0 flex-col gap-10">
             <ArticleBody body={article.body} withDropCap />
             <ArticleEndMatter references={article.references} tags={article.tags} />
-            <ShareBar url={toAbsoluteUrl(article.path)} title={article.title} />
+            <ShareBar
+              url={toAbsoluteUrl(article.path)}
+              title={article.title}
+              storiesImagePath={`${article.path}/stories.png`}
+            />
           </div>
           {/* The right column is the margin where notes are placed on wide screens. */}
           <div aria-hidden="true" className="hidden lg:block" />
