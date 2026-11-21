@@ -1,15 +1,17 @@
 import { DISPLAY_FONT_FAMILY, INTERFACE_FONT_FAMILY } from './open-graph-fonts';
 
 /**
- * The share card, rendered by `next/og` at build time in two formats:
+ * The share card, rendered by `next/og` at build time in three formats:
  * - `link-preview` (1200 × 630): the image shown when a link is shared;
- * - `instagram-post` (1080 × 1350, 4:5): the same card for the authors to post on Instagram.
+ * - `instagram-post` (1080 × 1350, 4:5): the same card for the authors to post on Instagram;
+ * - `instagram-story` (1080 × 1920, 9:16): the same card for Instagram Stories, with every
+ *   line of text inside the area the Stories interface leaves free.
  *
  * `next/og` supports inline styles only, without CSS variables, so the light theme tokens
  * from globals.css are repeated here.
  */
 
-export type ShareCardFormat = 'link-preview' | 'instagram-post';
+export type ShareCardFormat = 'link-preview' | 'instagram-post' | 'instagram-story';
 
 type ShareCardLayout = {
   width: number;
@@ -21,6 +23,9 @@ type ShareCardLayout = {
   titleSize: { short: number; long: number };
   footerSize: number;
 };
+
+/** Margins, in pixels, that the Instagram Stories interface may cover. */
+export const INSTAGRAM_STORY_SAFE_AREA = { top: 250, bottom: 340 };
 
 const SHARE_CARD_LAYOUTS: Record<ShareCardFormat, ShareCardLayout> = {
   'link-preview': {
@@ -42,6 +47,19 @@ const SHARE_CARD_LAYOUTS: Record<ShareCardFormat, ShareCardLayout> = {
     kickerSize: 24,
     titleSize: { short: 104, long: 80 },
     footerSize: 28,
+  },
+  'instagram-story': {
+    width: 1080,
+    height: 1920,
+    // Stories covers the top of the image with the progress bar and the account name, and the
+    // bottom with the reply field. Text stays out of the top 250 px and the bottom 340 px;
+    // the background still fills the whole image.
+    padding: `${INSTAGRAM_STORY_SAFE_AREA.top}px 88px ${INSTAGRAM_STORY_SAFE_AREA.bottom}px`,
+    ruleGap: 48,
+    wordmarkSize: 52,
+    kickerSize: 26,
+    titleSize: { short: 112, long: 88 },
+    footerSize: 30,
   },
 };
 
