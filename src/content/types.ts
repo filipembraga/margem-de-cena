@@ -1,3 +1,4 @@
+import type { ArchiveSelection } from '@/lib/archive-paths';
 import type { Category, ContentSection } from '@/lib/categories';
 import type { PlainDate } from '@/lib/dates';
 
@@ -146,3 +147,15 @@ export type Page = {
 
 /** Sections that can be empty, and are hidden from navigation and the home page when they are. */
 export type Section = ContentSection;
+
+/** One page of a category archive, possibly filtered by a tag (docs/adr/0011). */
+export type CategoryArchive = {
+  selection: ArchiveSelection;
+  articles: ArticleSummary[];
+  /** Position of the first article on this page, for the numbered essay list. */
+  firstArticlePosition: number;
+  pageCount: number;
+  /** The tags offered as filters, most used in the category first. Empty when not useful. */
+  filterTags: TagReference[];
+  selectedTag: TagReference | null;
+};

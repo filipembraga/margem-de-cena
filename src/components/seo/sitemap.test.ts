@@ -4,6 +4,8 @@ import { buildCatalog } from '@/content/catalog';
 import { articleInput, contentWith } from '@/content/testing/fixtures';
 import { createInMemorySource } from '@/content/testing/in-memory-source';
 
+import { ARCHIVE_PAGE_SIZE } from '@/lib/archive-paths';
+
 import { buildSitemap } from './sitemap';
 
 const SITE_URL = new URL('https://margemdecena.example');
@@ -54,5 +56,24 @@ describe('buildSitemap', () => {
     // The essay section and the tag exist only because of the demo article.
     expect(urls).not.toContain('https://margemdecena.example/ensaios');
     expect(urls).not.toContain('https://margemdecena.example/tags/medo');
+  });
+
+  it('lists archive pages after the first, but not tag filters', async () => {
+    const filmArticles = Array.from({ length: ARCHIVE_PAGE_SIZE + 1 }, (_, index) =>
+      articleInput(`filme-${index + 1}`, { tags: ['memória'] }),
+    );
+    const catalog = await buildCatalog(
+      createInMemorySource(contentWith({ articles: filmArticles })),
+      { includeDemo: false },
+    );
+
+    const urls = buildSitemap(
+      { articles: catalog.articles, twoPerspectives: [], authors: [], pages: [] },
+      SITE_URL,
+    ).map((entry) => entry.url);
+
+    expect(urls).toContain('https://margemdecena.example/filmes/pagina/2');
+    expect(urls).not.toContain('https://margemdecena.example/filmes/pagina/3');
+    expect(urls.some((url) => url.includes('/etiqueta/'))).toBe(false);
   });
 });

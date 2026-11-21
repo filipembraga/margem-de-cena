@@ -1,10 +1,13 @@
-import type { Category } from '@/lib/categories';
+import type { ArchiveSelection } from '@/lib/archive-paths';
+import { CATEGORIES, type Category } from '@/lib/categories';
+import { countPages, paginate } from '@/lib/pagination';
 
 import { toSummary, type ContentCatalog } from './resolve';
 import type {
   Article,
   ArticleSummary,
   Author,
+  CategoryArchive,
   Page,
   PageSlug,
   Section,
@@ -175,4 +178,108 @@ export function selectTags(catalog: ContentCatalog): TagReference[] {
 
 export function selectTag(catalog: ContentCatalog, slug: string): TagReference | null {
   return selectTags(catalog).find((tag) => tag.slug === slug) ?? null;
+}
+
+/** At most this many tags are offered as filters on an archive. */
+const MAXIMUM_FILTER_TAGS = 12;
+/** Filtering only helps when there is more than one article to narrow down. */
+const MINIMUM_ARTICLES_FOR_FILTER = 2;
+
+function selectCategoryArticles(catalog: ContentCatalog, category: Category): Article[] {
+  return catalog.articles.filter((article) => article.category === category);
+}
+
+/**
+ * The tags offered as filters in a category: the most used first, then alphabetically, up to
+ * `MAXIMUM_FILTER_TAGS`. None when the category has fewer than two articles.
+ */
+function selectFilterTags(categoryArticles: Article[]): TagReference[] {
+  if (categoryArticles.length < MINIMUM_ARTICLES_FOR_FILTER) {
+    return [];
+  }
+
+  const usageBySlug = new Map<string, { tag: TagReference; articleCount: number }>();
+  for (const tag of categoryArticles.flatMap((article) => article.tags)) {
+    const usage = usageBySlug.get(tag.slug);
+    usageBySlug.set(tag.slug, { tag, articleCount: (usage?.articleCount ?? 0) + 1 });
+  }
+
+  return [...usageBySlug.values()]
+    .sort(
+      (first, second) =>
+        second.articleCount - first.articleCount ||
+        first.tag.name.localeCompare(second.tag.name, 'pt-BR'),
+    )
+    .slice(0, MAXIMUM_FILTER_TAGS)
+    .map(({ tag }) => tag);
+}
+
+/**
+ * One page of a category archive, filtered by a tag or not. `null` when the page does not
+ * exist: a tag that is not one of the category's filters, or a page number out of range.
+ */
+export function selectCategoryArchive(
+  catalog: ContentCatalog,
+  selection: ArchiveSelection,
+  pageSize: number,
+): CategoryArchive | null {
+  const categoryArticles = selectCategoryArticles(catalog, selection.category);
+  const filterTags = selectFilterTags(categoryArticles);
+
+  const selectedTag =
+    selection.tagSlug === null
+      ? null
+      : (filterTags.find((tag) => tag.slug === selection.tagSlug) ?? null);
+  if (selection.tagSlug !== null && selectedTag === null) {
+    return null;
+  }
+
+  const matchingArticles = selectedTag
+    ? categoryArticles.filter((article) => article.tags.some((tag) => tag.slug === selectedTag.slug))
+    : categoryArticles;
+  const page = paginate(matchingArticles, selection.pageNumber, pageSize);
+  if (!page) {
+    return null;
+  }
+
+  return {
+    selection,
+    articles: page.items.map(toSummary),
+    firstArticlePosition: page.firstItemPosition,
+    pageCount: page.pageCount,
+    filterTags,
+    selectedTag,
+  };
+}
+
+/**
+ * Every archive page that exists, for static generation: each category's pages, and the pages
+ * of each tag filter. A category with no articles still has its (empty) first page.
+ */
+export function selectArchiveSelections(
+  catalog: ContentCatalog,
+  pageSize: number,
+): ArchiveSelection[] {
+  return CATEGORIES.flatMap((category) => {
+    const categoryArticles = selectCategoryArticles(catalog, category);
+
+    const selectionsOf = (tagSlug: string | null, articleCount: number): ArchiveSelection[] =>
+      Array.from({ length: countPages(articleCount, pageSize) }, (_, index) => ({
+        category,
+        tagSlug,
+        pageNumber: index + 1,
+      }));
+
+    return [
+      ...selectionsOf(null, categoryArticles.length),
+      ...selectFilterTags(categoryArticles).flatMap((tag) =>
+        selectionsOf(
+          tag.slug,
+          categoryArticles.filter((article) =>
+            article.tags.some((articleTag) => articleTag.slug === tag.slug),
+          ).length,
+        ),
+      ),
+    ];
+  });
 }

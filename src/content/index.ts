@@ -1,5 +1,6 @@
 import { cache } from 'react';
 
+import { ARCHIVE_PAGE_SIZE, type ArchiveSelection } from '@/lib/archive-paths';
 import type { Category } from '@/lib/categories';
 import { environment } from '@/lib/env';
 
@@ -7,9 +8,11 @@ import { buildCatalog } from './catalog';
 import type { ContentCatalog } from './resolve';
 import {
   selectAdjacentArticles,
+  selectArchiveSelections,
   selectArticle,
   selectArticles,
   selectAuthor,
+  selectCategoryArchive,
   selectFeaturedArticle,
   selectPage,
   selectRelatedArticles,
@@ -25,6 +28,7 @@ import type {
   Article,
   ArticleSummary,
   Author,
+  CategoryArchive,
   Page,
   PageSlug,
   Section,
@@ -60,6 +64,18 @@ function loadCatalog(): Promise<ContentCatalog> {
 /** Visible articles, most recent first, optionally filtered. */
 export async function getPublishedArticles(filter?: ArticleFilter): Promise<ArticleSummary[]> {
   return selectArticles(await loadCatalog(), filter);
+}
+
+/** One page of a category archive, or `null` when that page does not exist. */
+export async function getCategoryArchive(
+  selection: ArchiveSelection,
+): Promise<CategoryArchive | null> {
+  return selectCategoryArchive(await loadCatalog(), selection, ARCHIVE_PAGE_SIZE);
+}
+
+/** Every archive page to generate at build time, filtered and unfiltered. */
+export async function getArchiveSelections(): Promise<ArchiveSelection[]> {
+  return selectArchiveSelections(await loadCatalog(), ARCHIVE_PAGE_SIZE);
 }
 
 /** A visible article with its body, or `null` when the slug does not exist in that category. */

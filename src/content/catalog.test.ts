@@ -107,6 +107,13 @@ describe('buildCatalog', () => {
     expect(messagesOf(issues)).toContain('é da categoria "film", mas o texto é "book"');
   });
 
+  it('rejects article slugs reserved for the archive URLs', async () => {
+    const issues = await collectIssues(contentWith({ articles: [articleInput('pagina')] }));
+
+    expect(issues).toHaveLength(1);
+    expect(issues[0]?.message).toContain('"pagina" é reservado');
+  });
+
   it('allows a single featured published article', async () => {
     const issues = await collectIssues(
       contentWith({

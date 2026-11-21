@@ -1,3 +1,4 @@
+import { RESERVED_ARTICLE_SLUGS } from '@/lib/archive-paths';
 import { slugify } from '@/lib/slug';
 
 import type { ContentIssue } from './issues';
@@ -21,6 +22,7 @@ export function checkIntegrity(content: ParsedContent): ContentIssue[] {
   const report: IssueReporter = (origin, message) => issues.push({ origin, message });
 
   checkUniqueSlugs(content, report);
+  checkReservedArticleSlugs(content.articles, report);
   checkDemoPlacement(content, report);
   checkDates(content.articles, report);
   checkArticleAuthors(content, report);
@@ -50,6 +52,18 @@ function checkUniqueSlugs(content: ParsedContent, report: IssueReporter): void {
       } else {
         originsBySlug.set(record.slug, record.origin);
       }
+    }
+  }
+}
+
+/** `pagina` and `etiqueta` are archive URL segments (`/filmes/pagina/2`), never articles. */
+function checkReservedArticleSlugs(articles: ParsedArticle[], report: IssueReporter): void {
+  for (const { record } of articles) {
+    if (RESERVED_ARTICLE_SLUGS.includes(record.slug)) {
+      report(
+        record.origin,
+        `O nome de arquivo "${record.slug}" é reservado para os endereços dos arquivos de seção. Escolha outro nome.`,
+      );
     }
   }
 }
