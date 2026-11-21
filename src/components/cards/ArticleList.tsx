@@ -13,6 +13,8 @@ type ArticleListProps = {
   /** Shows the work after the category in each kicker, for lists that mix categories. */
   kickerWithWork?: boolean;
   headingLevel?: 'h2' | 'h3';
+  /** Numeral of the first row in the numbered layout, e.g. 13 on an archive's second page. */
+  firstPosition?: number;
 };
 
 /** A list of article cards, used by archives, tag pages and author pages. */
@@ -21,16 +23,17 @@ export function ArticleList({
   layout = 'grid',
   kickerWithWork = false,
   headingLevel = 'h2',
+  firstPosition = 1,
 }: ArticleListProps) {
   if (layout === 'numbered') {
     return (
-      <ol>
+      <ol start={firstPosition}>
         {articles.map((article, index) => (
           <li key={article.slug}>
             <ArticleCard
               article={toArticleCardData(article)}
               variant="numbered"
-              position={index + 1}
+              position={firstPosition + index}
               headingLevel={headingLevel}
             />
           </li>

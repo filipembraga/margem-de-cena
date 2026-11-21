@@ -2,7 +2,12 @@ import { describe, expect, it } from 'vitest';
 
 import { buildCatalog } from './catalog';
 import type { ContentCatalog } from './resolve';
-import { selectAdjacentArticles, selectRelatedArticles } from './selectors';
+import {
+  selectAdjacentArticles,
+  selectArchiveSelections,
+  selectCategoryArchive,
+  selectRelatedArticles,
+} from './selectors';
 import { articleInput, contentWith } from './testing/fixtures';
 import { createInMemorySource } from './testing/in-memory-source';
 
@@ -82,5 +87,85 @@ describe('selectRelatedArticles', () => {
 
     // "a-mare" is the oldest, but shares a tag and the category with "o-corredor".
     expect(related.map(slugOf)).toEqual(['a-mare']);
+  });
+});
+
+describe('selectCategoryArchive', () => {
+  // Film articles in the sample, newest first: o-corredor, os-comodos, a-mare.
+  it('splits a category into pages and keeps the position of each article', async () => {
+    const catalog = await buildSampleCatalog();
+
+    const secondPage = selectCategoryArchive(
+      catalog,
+      { category: 'film', tagSlug: null, pageNumber: 2 },
+      2,
+    );
+
+    expect(secondPage?.articles.map(slugOf)).toEqual(['a-mare']);
+    expect(secondPage?.pageCount).toBe(2);
+    expect(secondPage?.firstArticlePosition).toBe(3);
+  });
+
+  it('filters by a tag of the category and offers its tags as filters', async () => {
+    const catalog = await buildSampleCatalog();
+
+    const archive = selectCategoryArchive(
+      catalog,
+      { category: 'film', tagSlug: 'memoria', pageNumber: 1 },
+      12,
+    );
+
+    expect(archive?.selectedTag?.name).toBe('memória');
+    expect(archive?.articles.map(slugOf)).toEqual(['o-corredor', 'a-mare']);
+    expect(archive?.filterTags.map((tag) => tag.slug)).toEqual(['memoria']);
+  });
+
+  it('returns null for a tag outside the category or a page out of range', async () => {
+    const catalog = await buildSampleCatalog();
+
+    expect(
+      selectCategoryArchive(catalog, { category: 'book', tagSlug: 'memoria', pageNumber: 1 }, 12),
+    ).toBeNull();
+    expect(
+      selectCategoryArchive(catalog, { category: 'film', tagSlug: null, pageNumber: 2 }, 12),
+    ).toBeNull();
+  });
+
+  it('offers no filter in a category with a single article', async () => {
+    const catalog = await buildSampleCatalog();
+
+    const archive = selectCategoryArchive(
+      catalog,
+      { category: 'book', tagSlug: null, pageNumber: 1 },
+      12,
+    );
+
+    expect(archive?.filterTags).toEqual([]);
+  });
+});
+
+describe('selectArchiveSelections', () => {
+  it('lists every page of every category and of every tag filter', async () => {
+    const catalog = await buildSampleCatalog();
+
+    const filmSelections = selectArchiveSelections(catalog, 2).filter(
+      (selection) => selection.category === 'film',
+    );
+
+    expect(filmSelections).toEqual([
+      { category: 'film', tagSlug: null, pageNumber: 1 },
+      { category: 'film', tagSlug: null, pageNumber: 2 },
+      { category: 'film', tagSlug: 'memoria', pageNumber: 1 },
+    ]);
+  });
+
+  it('keeps the empty first page of a category without articles', async () => {
+    const catalog = await buildSampleCatalog();
+
+    const seriesSelections = selectArchiveSelections(catalog, 12).filter(
+      (selection) => selection.category === 'series',
+    );
+
+    expect(seriesSelections).toEqual([{ category: 'series', tagSlug: null, pageNumber: 1 }]);
   });
 });
