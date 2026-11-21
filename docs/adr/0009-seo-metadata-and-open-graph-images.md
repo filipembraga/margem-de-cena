@@ -2,7 +2,7 @@
 
 - Status: Accepted
 - Date: 2026-11-20
-- Amended: 2026-11-21 (Instagram post format, breadcrumbs)
+- Amended: 2026-11-21 (Instagram post and Stories formats, breadcrumbs)
 
 ## Context
 
@@ -26,8 +26,10 @@ images yet, and the brief forbids scraped promotional material.
   The same card is rendered a second time at 1080 × 1350 (4:5, the tallest ratio a feed post
   keeps), as a static file next to each article and Duas Leituras entry:
   `/filmes/[slug]/instagram.png`. It is not declared in the page metadata, because link
-  previews expect the wide format; the authors download it to post. Both formats take their
-  text from one function (`src/components/og/share-card-content.ts`), so they always match.
+  previews expect the wide format; the authors download it to post. A third format, for
+  Instagram Stories (`/stories.png`, 1080 × 1920), backs the share bar's "Instagram" button
+  (ADR 0012). All formats take their text from one function
+  (`src/components/og/share-card-content.ts`), so they always match.
 - **Fonts for the images.** `next/og` reads TTF, OTF or WOFF, not the WOFF2 files that
   `next/font` serves. The same families come from `@fontsource/cormorant-garamond` and
   `@fontsource/inter` (OFL), read from `node_modules` at build time.
