@@ -1,4 +1,5 @@
 import type { ArticleSummary, Author, Work } from '@/content';
+import { getCategoryDefinition, getCategoryPath } from '@/lib/categories';
 import { toAbsoluteUrl } from '@/lib/seo';
 import { siteConfig } from '@/lib/site-config';
 
@@ -112,4 +113,45 @@ export function buildWebsiteStructuredData(siteUrl: URL): StructuredData {
       'query-input': 'required name=search_term_string',
     },
   };
+}
+
+export type BreadcrumbItem = {
+  /** pt-BR label, e.g. "Filmes". */
+  name: string;
+  path: string;
+};
+
+/** First item of every trail. */
+export const HOME_BREADCRUMB: BreadcrumbItem = { name: 'Início', path: '/' };
+
+/**
+ * Where a page sits in the site, from the home page down: "Início › Filmes › A maré que não
+ * volta". Search engines may show it in place of the URL.
+ */
+export function buildBreadcrumbStructuredData(
+  items: BreadcrumbItem[],
+  siteUrl: URL,
+): StructuredData {
+  return {
+    '@context': SCHEMA_CONTEXT,
+    '@type': 'BreadcrumbList',
+    itemListElement: items.map((item, index) => ({
+      '@type': 'ListItem',
+      position: index + 1,
+      name: item.name,
+      item: toAbsoluteUrl(item.path, siteUrl),
+    })),
+  };
+}
+
+/** An article's trail: home, its category archive, the article. */
+export function getArticleBreadcrumbs(article: ArticleSummary): BreadcrumbItem[] {
+  return [
+    HOME_BREADCRUMB,
+    {
+      name: getCategoryDefinition(article.category).pluralLabel,
+      path: getCategoryPath(article.category),
+    },
+    { name: article.title, path: article.path },
+  ];
 }
