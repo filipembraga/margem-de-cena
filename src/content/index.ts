@@ -46,7 +46,11 @@ export type * from './types';
 export type { AdjacentArticles, ArticleFilter } from './selectors';
 
 function loadFreshCatalog(): Promise<ContentCatalog> {
-  return buildCatalog(createFilesystemSource(), { includeDemo: environment.showDemoContent });
+  return buildCatalog(createFilesystemSource(), {
+    includeDemo: environment.showDemoContent,
+    // Placeholders never reach the production deployment (docs/como-publicar.md).
+    rejectPlaceholders: environment.isVercelProduction,
+  });
 }
 
 /** In development, content is reloaded on every request so edits show up without a restart. */
