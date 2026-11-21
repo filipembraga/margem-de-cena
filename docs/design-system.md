@@ -133,11 +133,17 @@ Drop cap: first paragraph only, Display 92px (72 mobile), accent color, 3 lines.
   never hidden.
 - **Tags** — 1px `--line` border chips (`TagChip`), linking to the tag page `/tags/[slug]`.
   Inline mentions in the body (`<Tag>` in MDX) render exactly like regular body links.
+- **ArchiveTagFilter** — label "Etiquetas" and a row of `TagChip`s ("Todas" first) above a
+  category archive. The current filter is a filled chip (`--fg` fill, `--bg` text,
+  `aria-current="page"`). Hidden when the category has fewer than two articles.
+- **ArchivePagination** — under the archive, on a 1px `--fg` rule: "← Anterior", page
+  numbers (current one outlined, 44px targets) and "Próxima →". Hidden on a single page.
 - **ShareBar** — "Compartilhar": Copiar link (with "Link copiado" feedback via live region),
   WhatsApp, Threads, E-mail; uses Web Share API on mobile when available.
 - **PrevNext**, **RelatedArticles** (3 cards), **AuthorCard** (avatar placeholder, name, short
   bio, Instagram handle).
-- **InstagramInvite** — inverse band, Display line, outline button.
+- **InstagramInvite** — inverse band, Display line, outline button. While the publication has
+  no profile of its own, it shows one button per author profile instead.
 - **ThemeToggle** — icon button (sun/moon), aria-label "Ativar tema escuro"/"Ativar tema claro".
 - **Buttons** — primary: `--fg` fill, `--bg` text; secondary: 1px `--fg` outline; min height 44px.
 - **EmptyState** — Display italic sentence + short UI text, no illustrations.

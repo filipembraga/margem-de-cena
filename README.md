@@ -39,6 +39,7 @@ http://localhost:3000/styleguide.
 | `pnpm test:e2e`             | Smoke and accessibility tests (Playwright + axe) on a production build with demo content |
 | `pnpm format`               | Format with Prettier                                               |
 | `pnpm verify:production-build` | After `pnpm build` without demo content, fails if demo content reached any page, the search index or the sitemap |
+| `pnpm check:placeholders`   | Lists the `[A PREENCHER: …]` texts still to be written; `--strict` fails while any is left |
 
 The first end-to-end run needs a browser: `pnpm exec playwright install chromium`.
 
@@ -95,6 +96,8 @@ would implement `ContentSource` and reuse everything after it.
 ## Workflow
 
 Work happens in stages, one branch and pull request per stage, with Conventional Commits.
+commitlint also rejects AI attribution in commit messages, in the commit-msg hook and again
+in CI.
 Each pull request description is the stage report. CI runs typecheck, lint, formatting, unit
 tests, a production build and the end-to-end suite on every pull request
 ([ADR 0006](docs/adr/0006-quality-gates-and-branch-workflow.md)).
