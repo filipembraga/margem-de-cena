@@ -20,7 +20,8 @@ Todo o conteúdo mora na pasta `content/`:
 
 **O nome do arquivo é o endereço do texto.** O arquivo `content/articles/a-mare-que-nao-volta.mdx`,
 de um filme, vira `margemdecena…/filmes/a-mare-que-nao-volta`. Use só letras minúsculas sem
-acento, números e hífens.
+acento, números e hífens. Os nomes `pagina` e `etiqueta` são reservados para as páginas das
+seções (`/filmes/pagina/2`, `/filmes/etiqueta/memoria`) e não podem ser usados.
 
 > **O endereço é permanente.** Depois que um texto é publicado, não renomeie o arquivo: links
 > compartilhados, buscadores e, no futuro, curtidas e comentários dependem dele. Se for mesmo
@@ -319,8 +320,26 @@ Não é preciso escrever nada disto:
 - **Botões de compartilhar** (copiar link, WhatsApp, Threads e e-mail).
 - **Imagem de compartilhamento**: quando alguém compartilha o link, aparece um cartão com a
   categoria, o título, a autoria e a data, nas fontes do site.
+- **Imagem para o Instagram**: o mesmo cartão, no formato de post do Instagram (1080 × 1350).
+  Para baixar, acrescente `/instagram.png` ao endereço do texto, por exemplo
+  `margemdecena…/filmes/a-mare-que-nao-volta/instagram.png`. Funciona também nas entradas de
+  Duas Leituras (`margemdecena…/duas-leituras/a-casa-das-mares/instagram.png`).
+- **Páginas da seção**: cada seção mostra 12 textos por página, com os botões "Anterior" e
+  "Próxima", e as etiquetas mais usadas na seção servem de filtro.
 - **Busca**: o texto entra na busca do site pelo título, pela obra, pela autoria, pelas
   etiquetas e pelo resumo.
+
+## Textos a preencher
+
+Trechos provisórios (bios, páginas Sobre, Contato e Privacidade) ficam marcados como
+`[A PREENCHER: o que falta]`. Para ver a lista do que ainda falta, rode:
+
+```sh
+pnpm check:placeholders
+```
+
+O comando mostra cada trecho com o arquivo e a linha. Ao trocar um trecho pelo texto
+definitivo, apague o marcador inteiro, com os colchetes.
 
 ## Seções vazias
 

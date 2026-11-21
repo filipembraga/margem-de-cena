@@ -2,6 +2,7 @@
 
 - Status: Accepted
 - Date: 2026-11-19
+- Amended: 2026-11-21 (AI attribution rule, list of texts to fill in)
 
 ## Context
 
@@ -22,12 +23,15 @@ before it is merged.
   360, 768 and 1280 px. Any console error or hydration warning fails a test.
 - `@axe-core/playwright` for WCAG 2.x A/AA checks on every page template, in both themes.
 - Husky, lint-staged and commitlint enforce formatting, lint and Conventional Commits
-  locally.
+  locally. A local commitlint rule (`scripts/commitlint/no-ai-attribution.mts`) rejects AI
+  attribution in a message: a `Co-Authored-By` trailer naming Claude or Anthropic, or a
+  "Generated with" line.
 
 **CI (GitHub Actions)**, on every pull request and on pushes to `main`:
 
 1. `quality`: install, typecheck, lint, format check, unit tests, commitlint on the PR's
-   commits, and the no-drafts check.
+   commits (so a commit made with `--no-verify` is still checked), the no-drafts check, and
+   the list of `[A PREENCHER: …]` texts as warnings.
 2. `build-production`: build without demo content, then run the demo-leak checks.
 3. `e2e`: build with demo content, then run the smoke and accessibility suites. The
    Playwright report is uploaded when a test fails.
