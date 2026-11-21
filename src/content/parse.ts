@@ -68,6 +68,11 @@ function parseData<Data>(schema: z.ZodType<Data>, record: RawRecord): ParseOutco
   };
 }
 
+/** Turns a line counted from the start of the body into the line of the stored file. */
+export function toFileLine(bodyLine: number | null | undefined, record: RawRecord): number | null {
+  return bodyLine === null || bodyLine === undefined ? null : bodyLine + record.bodyLineOffset;
+}
+
 async function parseMdxRecord<Data>(
   schema: z.ZodType<Data>,
   record: RawRecord,
@@ -79,7 +84,11 @@ async function parseMdxRecord<Data>(
   const compiled = await compileBody(record.body, record.origin);
   const bodyIssues = compiled.success
     ? []
-    : compiled.issues.map((issue) => ({ origin: record.origin, ...issue }));
+    : compiled.issues.map((issue) => ({
+        origin: record.origin,
+        ...issue,
+        line: toFileLine(issue.line, record),
+      }));
 
   if (outcome.data === null || !compiled.success) {
     return { parsed: null, issues: [...outcome.issues, ...bodyIssues] };

@@ -47,7 +47,7 @@ export function createFilesystemSource(rootDirectory: string = process.cwd()): C
 
         return format === 'mdx'
           ? parseMdxFile(fileContents, { slug, origin, isDemo })
-          : { slug, origin, isDemo, body: '', ...parseYamlSafely(fileContents) };
+          : { slug, origin, isDemo, body: '', bodyLineOffset: 0, ...parseYamlSafely(fileContents) };
       }),
     );
   }
@@ -117,6 +117,7 @@ function parseMdxFile(
       ...record,
       data: {},
       body: fileContents,
+      bodyLineOffset: 0,
       syntaxError: 'Frontmatter ausente: o arquivo deve começar com um bloco entre linhas "---".',
     };
   }
@@ -124,8 +125,14 @@ function parseMdxFile(
   return {
     ...record,
     body: fileContents.slice(match[0].length),
+    bodyLineOffset: countLines(match[0]),
     ...parseYamlSafely(match[1] ?? ''),
   };
+}
+
+/** Number of line breaks in a block of text: the lines it takes before what follows it. */
+function countLines(text: string): number {
+  return text.split('\n').length - 1;
 }
 
 /**
