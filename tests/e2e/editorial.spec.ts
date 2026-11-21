@@ -133,11 +133,36 @@ test.describe('search engines and sharing', () => {
     const imageResponse = await request.get(new URL(shareImage ?? '').pathname);
     expect(imageResponse.headers()['content-type']).toBe('image/png');
 
-    const structuredData = await page.locator('script[type="application/ld+json"]').textContent();
-    expect(JSON.parse(structuredData ?? '{}')).toMatchObject({
-      '@type': 'Article',
-      headline: 'A maré que não volta',
-    });
+    const structuredData = (
+      await page.locator('script[type="application/ld+json"]').allTextContents()
+    ).map((json) => JSON.parse(json) as Record<string, unknown>);
+    expect(structuredData).toEqual([
+      expect.objectContaining({ '@type': 'Article', headline: 'A maré que não volta' }),
+      expect.objectContaining({
+        '@type': 'BreadcrumbList',
+        itemListElement: [
+          expect.objectContaining({ position: 1, name: 'Início' }),
+          expect.objectContaining({ position: 2, name: 'Filmes' }),
+          expect.objectContaining({ position: 3, name: 'A maré que não volta' }),
+        ],
+      }),
+    ]);
+  });
+
+  test('an article has its card in the proportion of an Instagram post', async ({ request }) => {
+    const response = await request.get(`${ARTICLE_PATH}/instagram.png`);
+
+    expect(response.status()).toBe(200);
+    expect(response.headers()['content-type']).toBe('image/png');
+    // A PNG stores its width and height at bytes 16 to 23.
+    const image = await response.body();
+    expect([image.readUInt32BE(16), image.readUInt32BE(20)]).toEqual([1080, 1350]);
+  });
+
+  test('an archive filtered by a tag stays out of search engines', async ({ page }) => {
+    await page.goto('/filmes/etiqueta/memoria');
+
+    await expect(page.locator('meta[name="robots"]')).toHaveAttribute('content', /noindex/);
   });
 
   test('the sitemap never lists demonstration content', async ({ request }) => {
@@ -153,5 +178,55 @@ test.describe('search engines and sharing', () => {
     const robots = await (await request.get('/robots.txt')).text();
 
     expect(robots).toContain('Disallow: /');
+  });
+});
+
+test.describe('category archive', () => {
+  test('filters the archive by a tag and back', async ({ page }) => {
+    await page.goto('/filmes');
+    const filter = page.getByRole('navigation', { name: 'Filtrar por etiqueta' });
+    await expect(filter.getByRole('link', { name: 'Todas' })).toHaveAttribute(
+      'aria-current',
+      'page',
+    );
+
+    await filter.getByRole('link', { name: 'horror' }).click();
+
+    await expect(page).toHaveURL('/filmes/etiqueta/horror');
+    await expect(filter.getByRole('link', { name: 'horror' })).toHaveAttribute(
+      'aria-current',
+      'page',
+    );
+    await expect(page.getByRole('heading', { level: 2 })).toHaveText([
+      'O medo que mora no corredor',
+    ]);
+
+    await filter.getByRole('link', { name: 'Todas' }).click();
+    await expect(page).toHaveURL('/filmes');
+  });
+
+  test('shows no page links while the archive fits on one page', async ({ page }) => {
+    await page.goto('/filmes');
+
+    await expect(page.getByRole('navigation', { name: 'Páginas do arquivo' })).toHaveCount(0);
+  });
+});
+
+test.describe('Instagram invitation', () => {
+  test("invites readers to the authors' profiles while the publication has none", async ({
+    page,
+  }) => {
+    await page.goto('/');
+    const invitation = page.getByRole('region', { name: 'No Instagram' });
+
+    await expect(invitation.getByRole('link')).toHaveText([
+      /^Seguir @drika0/,
+      /^Seguir @djfillzouk/,
+    ]);
+    await expect(
+      invitation.getByRole('link', {
+        name: /djfillzouk \(perfil de Filipe Braga; abre em nova aba\)/,
+      }),
+    ).toHaveAttribute('href', 'https://www.instagram.com/djfillzouk/');
   });
 });

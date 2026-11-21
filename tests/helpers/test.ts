@@ -48,6 +48,7 @@ export const PAGES = [
   { path: '/', name: 'página inicial' },
   { path: '/filmes', name: 'arquivo de categoria' },
   { path: '/ensaios', name: 'arquivo de ensaios' },
+  { path: '/filmes/etiqueta/memoria', name: 'arquivo filtrado por etiqueta' },
   { path: '/filmes/a-mare-que-nao-volta', name: 'página de artigo' },
   { path: '/livros/a-gaveta-como-arquitetura-do-romance', name: 'artigo com imagem no texto' },
   { path: '/duas-leituras', name: 'arquivo de Duas Leituras' },

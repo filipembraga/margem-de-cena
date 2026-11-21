@@ -72,12 +72,24 @@ test.describe('links', () => {
 test.describe('not found', () => {
   const UNKNOWN_PATH = '/endereco-que-nao-existe';
   const UNKNOWN_ARTICLE_PATH = '/filmes/texto-que-nao-existe';
-  test.use({ expectedFailedPaths: [UNKNOWN_PATH, UNKNOWN_ARTICLE_PATH] });
+  const MISSING_ARCHIVE_PATHS = [
+    '/filmes/pagina/1',
+    '/filmes/pagina/99',
+    '/filmes/etiqueta/etiqueta-que-nao-existe',
+  ];
+  test.use({ expectedFailedPaths: [UNKNOWN_PATH, UNKNOWN_ARTICLE_PATH, ...MISSING_ARCHIVE_PATHS] });
 
   test('answers an unknown article slug with a real 404', async ({ page }) => {
     const response = await page.goto(UNKNOWN_ARTICLE_PATH);
 
     expect(response?.status()).toBe(404);
+  });
+
+  test('answers archive pages that do not exist with a real 404', async ({ page }) => {
+    for (const path of MISSING_ARCHIVE_PATHS) {
+      const response = await page.goto(path);
+      expect(response?.status(), path).toBe(404);
+    }
   });
 
   test('answers an unknown address with the pt-BR 404 page', async ({ page }) => {
