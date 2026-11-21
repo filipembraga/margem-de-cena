@@ -1,13 +1,13 @@
 import { describe, expect, it } from 'vitest';
 
-import { buildCatalog } from './catalog';
+import { buildCatalog, type CatalogOptions } from './catalog';
 import { ContentValidationError, type ContentIssue } from './issues';
 import { articleInput, contentWith } from './testing/fixtures';
 import { createInMemorySource, type InMemoryContent } from './testing/in-memory-source';
 
 async function collectIssues(
   content: InMemoryContent,
-  options = { includeDemo: true },
+  options: CatalogOptions = { includeDemo: true },
 ): Promise<ContentIssue[]> {
   try {
     await buildCatalog(createInMemorySource(content), options);
@@ -424,5 +424,80 @@ describe('spoilers in the body', () => {
     );
 
     expect(messagesOf(issues)).toContain('<Spoiler> deve ficar em um parágrafo próprio');
+  });
+});
+
+describe('placeholders on the production deployment', () => {
+  const PRODUCTION = { includeDemo: false, rejectPlaceholders: true };
+
+  it('rejects "[A PREENCHER]" in a published article, with the line in the body', async () => {
+    const issues = await collectIssues(
+      contentWith({
+        articles: [articleInput('a-mare', {}, 'Primeiro parágrafo.\n\n[A PREENCHER: o final.]')],
+      }),
+      PRODUCTION,
+    );
+
+    expect(issues).toEqual([
+      {
+        origin: 'content/articles/a-mare',
+        line: 3,
+        message:
+          'Texto provisório em conteúdo publicado: "[A PREENCHER: o final.]". ' +
+          'Substitua pelo texto definitivo antes de publicar.',
+      },
+    ]);
+  });
+
+  it('reports the line of the file, counting the frontmatter before the body', async () => {
+    const article = {
+      ...articleInput('a-mare', {}, 'Texto.\n[A PREENCHER: o final.]'),
+      bodyLineOffset: 9,
+    };
+
+    const issues = await collectIssues(contentWith({ articles: [article] }), PRODUCTION);
+
+    expect(issues.map((issue) => issue.line)).toEqual([11]);
+  });
+
+  it('rejects "[A PREENCHER]" in author data and in pages', async () => {
+    const issues = await collectIssues(
+      {
+        ...contentWith({}),
+        authors: [
+          {
+            slug: 'filipe-braga',
+            data: { name: 'Filipe Braga', shortBio: '[A PREENCHER: mini bio]', fullBio: 'Bio.' },
+          },
+          {
+            slug: 'adriana-guimaraes',
+            data: { name: 'Adriana Guimarães', shortBio: 'Bio.', fullBio: 'Bio.' },
+          },
+        ],
+        pages: ['sobre', 'contato', 'privacidade', 'creditos'].map((slug) => ({
+          slug,
+          data: { title: slug, description: 'Descrição.' },
+          body: slug === 'sobre' ? '[A PREENCHER: a história do nome.]' : 'Texto.',
+        })),
+      },
+      PRODUCTION,
+    );
+
+    expect(issues.map((issue) => issue.origin)).toEqual([
+      'content/pages/sobre',
+      'content/authors/filipe-braga',
+    ]);
+  });
+
+  it('ignores drafts and accepts placeholders outside production', async () => {
+    const withPlaceholders = contentWith({
+      articles: [
+        articleInput('rascunho', { status: 'draft' }, '[A PREENCHER: tudo.]'),
+        articleInput('publicado', {}, '[A PREENCHER: o final.]'),
+      ],
+    });
+
+    expect(await collectIssues(withPlaceholders, PRODUCTION)).toHaveLength(1);
+    expect(await collectIssues(withPlaceholders, { includeDemo: false })).toEqual([]);
   });
 });

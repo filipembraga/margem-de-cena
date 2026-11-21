@@ -1,9 +1,19 @@
 import { checkIntegrity } from './integrity';
 import { ContentValidationError, type ContentIssue } from './issues';
 import { parseContent, toFileLine, type ParsedContent } from './parse';
+import { findPublishedPlaceholders } from './placeholders';
 import { resolveCatalog, type ContentCatalog, type ImageSizes } from './resolve';
 import type { ContentSource, RawRecord } from './source';
 import type { ImageSize } from './types';
+
+export type CatalogOptions = {
+  includeDemo: boolean;
+  /**
+   * Fails on "[A PREENCHER: …]" texts left in published content or author data. Set for the
+   * production deployment only, where a placeholder must never go live.
+   */
+  rejectPlaceholders?: boolean;
+};
 
 /**
  * Runs the whole pipeline (docs/adr/0002-file-based-content-layer.md):
@@ -16,14 +26,15 @@ import type { ImageSize } from './types';
  */
 export async function buildCatalog(
   source: ContentSource,
-  options: { includeDemo: boolean },
+  options: CatalogOptions,
 ): Promise<ContentCatalog> {
-  const raw = await source.load(options);
+  const raw = await source.load({ includeDemo: options.includeDemo });
   const { content, issues: parseIssues } = await parseContent(raw);
   const integrityIssues = checkIntegrity(content);
   const { imageSizes, issues: imageIssues } = await measureImages(content, source);
+  const placeholderIssues = options.rejectPlaceholders ? findPublishedPlaceholders(content) : [];
 
-  const issues = [...parseIssues, ...integrityIssues, ...imageIssues];
+  const issues = [...parseIssues, ...integrityIssues, ...imageIssues, ...placeholderIssues];
   if (issues.length > 0) {
     throw new ContentValidationError(issues);
   }

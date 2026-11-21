@@ -58,8 +58,12 @@ fail the build:
 - Image files exist and can be read (their dimensions are kept, ADR 0010), and every image
   has alt text, a credit and a licence.
 - Two tag spellings that produce the same slug are an error.
+- `pagina` and `etiqueta` are reserved for archive URLs and cannot be article slugs (ADR 0011).
+- On the production deployment only, no published article, page, work, Duas Leituras entry or
+  author may contain a `[A PREENCHER: …]` placeholder.
 
 Validation messages are written in pt-BR, because the authors are the ones who read them.
+Lines in messages are lines of the stored file, frontmatter included.
 
 **Slug permanence.** Once published, a slug never changes silently. A rename declares the
 previous slug, which becomes a permanent (308) redirect.
