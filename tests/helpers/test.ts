@@ -57,7 +57,7 @@ export const PAGES = [
   { path: '/sobre', name: 'página Sobre' },
   { path: '/privacidade', name: 'página institucional' },
   { path: '/busca', name: 'página de busca' },
-  { path: '/componentes', name: 'prévia de componentes' },
+  { path: '/styleguide', name: 'guia de estilo' },
 ] as const;
 
 export const DESKTOP_BREAKPOINT = 1024;

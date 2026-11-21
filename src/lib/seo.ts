@@ -46,7 +46,7 @@ export type PageMetadataInput = {
   article?: ArticleOpenGraph;
   /** True when the route has its own `opengraph-image` file. */
   hasOwnShareImage?: boolean;
-  /** Pages that must stay out of search engines (the component preview, for example). */
+  /** Pages that must stay out of search engines (the styleguide, for example). */
   isHiddenFromSearchEngines?: boolean;
 };
 

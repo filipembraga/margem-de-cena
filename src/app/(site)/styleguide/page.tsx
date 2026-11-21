@@ -15,11 +15,17 @@ import { buildPageMetadata } from '@/lib/seo';
 import { essayDemoArticles, featuredDemoArticle, recentDemoArticles } from './demo-articles';
 
 export const metadata: Metadata = buildPageMetadata({
-  title: 'Componentes',
-  description: 'Prévia dos componentes visuais da Margem de Cena.',
-  path: '/componentes',
+  title: 'Guia de estilo',
+  description: 'Tokens e componentes visuais da Margem de Cena, nos temas claro e escuro.',
+  path: '/styleguide',
   isHiddenFromSearchEngines: true,
 });
+
+/** Each preview block forces its theme, so both show side by side whatever the page theme. */
+const THEMES = [
+  { theme: 'light', label: 'Tema claro' },
+  { theme: 'dark', label: 'Tema escuro' },
+] as const;
 
 const COLOR_TOKENS = [
   { token: '--bg', label: 'Papel', swatchClassName: 'bg-bg' },
@@ -33,6 +39,7 @@ const COLOR_TOKENS = [
   { token: '--highlight', label: 'Grifo', swatchClassName: 'bg-highlight' },
   { token: '--inverse-bg', label: 'Fundo invertido', swatchClassName: 'bg-inverse-bg' },
   { token: '--inverse-accent', label: 'Acento no invertido', swatchClassName: 'bg-inverse-accent' },
+  { token: '--cover-bg', label: 'Capa tipográfica', swatchClassName: 'bg-cover-bg' },
 ] as const;
 
 const TYPE_STYLES = [
@@ -81,10 +88,10 @@ const TYPE_STYLES = [
 ] as const;
 
 /**
- * Living style guide for Stage 2. Available only where demo content is allowed, so it is a
- * 404 in production.
+ * Living style guide: tokens and components, for visual review. Available only where demo
+ * content is allowed, so it is a 404 in production.
  */
-export default function ComponentPreviewPage() {
+export default function StyleguidePage() {
   if (!environment.showDemoContent) {
     notFound();
   }
@@ -93,7 +100,7 @@ export default function ComponentPreviewPage() {
     <div className="page-container flex flex-col gap-22 py-14 sm:py-18">
       <header className="flex flex-col gap-4">
         <p className="type-kicker text-accent">Design system v0.1</p>
-        <h1 className="type-hero-title">Componentes</h1>
+        <h1 className="type-hero-title">Guia de estilo</h1>
         <p className="max-w-2xl type-excerpt-large text-fg-soft">
           Tokens, tipografia e componentes-base da Margem de Cena, nos temas claro e escuro. Todo o
           conteúdo desta página é fictício.
@@ -199,6 +206,40 @@ export default function ComponentPreviewPage() {
               Seguir no Instagram
             </ButtonLink>
           </div>
+        </div>
+      </PreviewSection>
+
+      <PreviewSection id="capa-tipografica" title="Capa tipográfica">
+        <p className="max-w-2xl type-meta text-muted">
+          Para textos sem imagem licenciada. Nos dois temas a capa é uma superfície escura; no
+          escuro ela fica um degrau acima da faixa, com fio de 1px, em vez de virar um bloco claro.
+        </p>
+        <div className="grid gap-6 md:grid-cols-2">
+          {THEMES.map(({ theme, label }) => (
+            <div
+              key={theme}
+              data-theme={theme}
+              className="flex flex-col gap-5 border border-line bg-bg p-6 text-fg"
+            >
+              <p className="type-label">{label}</p>
+              <div className="grid grid-cols-[minmax(0,2fr)_minmax(0,1fr)] items-end gap-5">
+                <Cover
+                  source={{ kind: 'fallback', title: 'A casa das marés', kicker: 'Filmes' }}
+                  aspectRatio="3:2"
+                />
+                <Cover
+                  source={{ kind: 'fallback', title: 'As cartas que não mandei' }}
+                  aspectRatio="2:3"
+                />
+              </div>
+              <div className="bg-band p-4">
+                <div className="w-1/2">
+                  <Cover source={{ kind: 'fallback', title: 'Labirinto' }} aspectRatio="3:4" />
+                </div>
+                <p className="pt-3 type-caption text-fg-soft">Sobre a faixa (--band)</p>
+              </div>
+            </div>
+          ))}
         </div>
       </PreviewSection>
 

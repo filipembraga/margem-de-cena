@@ -57,9 +57,9 @@ describe('buildPageMetadata', () => {
 
   it('keeps hidden pages out of search engines', () => {
     const metadata = buildPageMetadata({
-      title: 'Componentes',
+      title: 'Guia de estilo',
       description: 'Prévia.',
-      path: '/componentes',
+      path: '/styleguide',
       isHiddenFromSearchEngines: true,
     });
 
