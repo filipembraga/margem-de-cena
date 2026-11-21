@@ -12,6 +12,8 @@ export const metadata: Metadata = buildPageMetadata({
   title: 'Busca',
   description: 'Busque textos da Margem de Cena por título, obra, autoria ou etiqueta.',
   path: '/busca',
+  // Search result pages are thin and endless; search engines index the articles themselves.
+  isHiddenFromSearchEngines: true,
 });
 
 /**

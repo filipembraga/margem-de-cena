@@ -38,7 +38,7 @@ export type ArticleOpenGraph = {
 };
 
 export type PageMetadataInput = {
-  /** Omitted on the home page, which uses the site name alone. */
+  /** Omitted on the home page, which uses `siteConfig.homeTitle`. */
   title?: string;
   description: string;
   /** The page's own path, used as its canonical URL. */
@@ -46,7 +46,10 @@ export type PageMetadataInput = {
   article?: ArticleOpenGraph;
   /** True when the route has its own `opengraph-image` file. */
   hasOwnShareImage?: boolean;
-  /** Pages that must stay out of search engines (the styleguide, for example). */
+  /**
+   * Pages that must stay out of search results (the styleguide, search, filtered archives).
+   * Their links are still followed on the production deployment.
+   */
   isHiddenFromSearchEngines?: boolean;
 };
 
@@ -58,7 +61,7 @@ export function buildPageMetadata({
   hasOwnShareImage = false,
   isHiddenFromSearchEngines = false,
 }: PageMetadataInput): Metadata {
-  const shareTitle = title ?? siteConfig.name;
+  const shareTitle = title ?? siteConfig.homeTitle;
   const shareImages = hasOwnShareImage ? {} : { images: [SITE_SHARE_IMAGE] };
 
   // Next replaces (rather than merges) the layout's `openGraph`, so the shared fields are
@@ -88,6 +91,8 @@ export function buildPageMetadata({
         }
       : { ...openGraphBase, type: 'website' },
     twitter: { card: 'summary_large_image', title: shareTitle, description, ...shareImages },
-    ...(isHiddenFromSearchEngines && { robots: { index: false, follow: false } }),
+    ...(isHiddenFromSearchEngines && {
+      robots: { index: false, follow: environment.isVercelProduction },
+    }),
   };
 }

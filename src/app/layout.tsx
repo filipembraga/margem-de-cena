@@ -13,7 +13,7 @@ import './globals.css';
 export const metadata: Metadata = {
   metadataBase: environment.siteUrl,
   title: {
-    default: siteConfig.name,
+    default: siteConfig.homeTitle,
     template: `%s · ${siteConfig.name}`,
   },
   description: siteConfig.description,

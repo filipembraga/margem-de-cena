@@ -63,6 +63,7 @@ describe('buildPageMetadata', () => {
       isHiddenFromSearchEngines: true,
     });
 
+    // Outside production nothing is followed either (ADR 0004).
     expect(metadata.robots).toEqual({ index: false, follow: false });
   });
 });
