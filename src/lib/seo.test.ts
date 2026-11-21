@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { buildPageMetadata, toAbsoluteUrl } from './seo';
+import { buildPageMetadata, getRobotsDirective, toAbsoluteUrl } from './seo';
 
 describe('buildPageMetadata', () => {
   it('sets the canonical URL and points to the site share card', () => {
@@ -65,5 +65,22 @@ describe('buildPageMetadata', () => {
 
     // Outside production nothing is followed either (ADR 0004).
     expect(metadata.robots).toEqual({ index: false, follow: false });
+  });
+});
+
+describe('getRobotsDirective', () => {
+  it('opens only the production deployment to search engines', () => {
+    expect(
+      getRobotsDirective({ isHiddenFromSearchEngines: false, isProductionDeployment: true }),
+    ).toEqual({ index: true, follow: true });
+    expect(
+      getRobotsDirective({ isHiddenFromSearchEngines: false, isProductionDeployment: false }),
+    ).toEqual({ index: false, follow: false });
+  });
+
+  it('keeps hidden pages out of the index on production, but follows their links', () => {
+    expect(
+      getRobotsDirective({ isHiddenFromSearchEngines: true, isProductionDeployment: true }),
+    ).toEqual({ index: false, follow: true });
   });
 });

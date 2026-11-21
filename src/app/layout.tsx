@@ -23,11 +23,8 @@ export const metadata: Metadata = {
     locale: 'pt_BR',
     siteName: siteConfig.name,
   },
-  // Only the production deployment is indexed; previews and local builds are not (ADR 0004).
-  robots: {
-    index: environment.isVercelProduction,
-    follow: environment.isVercelProduction,
-  },
+  // No `robots` here: every page sets its own through buildPageMetadata, and the 404 page keeps
+  // only the `noindex` Next adds to it. A value here would give the 404 a second robots tag.
 };
 
 export const viewport: Viewport = {
