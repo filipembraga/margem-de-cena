@@ -7,6 +7,7 @@ import { ArticleList } from '@/components/cards/ArticleList';
 import { AuthorCard } from '@/components/cards/AuthorCard';
 import { CategoryBlock } from '@/components/home/CategoryBlock';
 import { InstagramInvite } from '@/components/home/InstagramInvite';
+import { chooseInstagramProfiles } from '@/components/home/instagram-profiles';
 import { JsonLd } from '@/components/seo/JsonLd';
 import { buildWebsiteStructuredData } from '@/components/seo/structured-data';
 import { TwoPerspectivesBlock } from '@/components/two-perspectives/TwoPerspectivesBlock';
@@ -98,7 +99,9 @@ export default async function HomePage() {
 
       <WhoWrites authors={authors} />
 
-      {siteConfig.instagramHandle && <InstagramInvite handle={siteConfig.instagramHandle} />}
+      <InstagramInvite
+        {...chooseInstagramProfiles(siteConfig.instagramHandle, siteConfig.name, authors)}
+      />
     </>
   );
 }
