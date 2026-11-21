@@ -3,6 +3,8 @@ import Image from 'next/image';
 import type { ImageAsset } from '@/content';
 import { classNames } from '@/lib/class-names';
 
+import { TypographicCover } from './TypographicCover';
+
 /** Image ratios from the design system (section 5). */
 export type CoverAspectRatio = '16:10' | '21:9' | '4:3' | '3:2' | '16:9' | '2:3' | '3:4';
 
@@ -20,7 +22,7 @@ const ASPECT_RATIO_CLASS_NAMES: Record<CoverAspectRatio, string> = {
  * What fills a cover slot.
  * - `image`: a licensed image from the content layer.
  * - `fallback`: typographic cover for articles without a licensed image.
- * - `placeholder`: beige box with a caption, used only by the component preview page.
+ * - `placeholder`: beige box with a caption, used only by the styleguide page.
  */
 export type CoverSource =
   | { kind: 'image'; image: ImageAsset }
@@ -77,7 +79,7 @@ function CoverContent({
         />
       );
     case 'fallback':
-      return <FallbackCover title={source.title} kicker={source.kicker} />;
+      return <TypographicCover title={source.title} kicker={source.kicker} />;
     case 'placeholder':
       return <PlaceholderCover caption={source.caption} />;
   }
@@ -88,28 +90,6 @@ function PlaceholderCover({ caption }: { caption: string }) {
     <div aria-hidden="true" className="absolute inset-0 bg-line">
       <p className="absolute bottom-3.5 left-4 text-[0.625rem] tracking-[0.14em] text-fg uppercase">
         {caption}
-      </p>
-    </div>
-  );
-}
-
-/**
- * Inverse fill with the title in display italic. The title size follows the cover width
- * (container query units), so the same component works in a card or a hero.
- */
-function FallbackCover({ title, kicker }: { title: string; kicker?: string }) {
-  return (
-    <div className="@container absolute inset-0 flex flex-col justify-between bg-inverse-bg p-5">
-      {kicker ? (
-        <p className="text-[0.625rem] tracking-[0.16em] text-inverse-accent uppercase">{kicker}</p>
-      ) : (
-        <span />
-      )}
-      <p
-        aria-hidden="true"
-        className="font-display text-[clamp(1.5rem,9cqi,3.5rem)] leading-none text-inverse-fg italic"
-      >
-        {title}
       </p>
     </div>
   );

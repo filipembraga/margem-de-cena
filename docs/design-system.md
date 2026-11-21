@@ -22,23 +22,28 @@ gradient backgrounds, decorative animation, stock photography.
 Define as CSS custom properties in `:root` and `[data-theme="dark"]`, exposed to Tailwind v4
 through `@theme`. Components use semantic tokens only, never raw hex values.
 
-| Token          | Light     | Dark      | Use                                                  |
-| -------------- | --------- | --------- | ---------------------------------------------------- |
-| `--bg`         | `#F4F0E8` | `#1C1B19` | page background (paper)                              |
-| `--fg`         | `#252522` | `#ECE6DA` | primary text, rules, primary button                  |
-| `--fg-soft`    | `#3A3935` | `#CFC8BB` | excerpts, standfirst, secondary body text            |
-| `--muted`      | `#6A665F` | `#A39D92` | metadata, captions, small labels (≥ 4.5:1)           |
-| `--muted-lg`   | `#77736D` | `#8F897E` | large text or decoration only (fails at small sizes) |
-| `--line`       | `#DCD2C3` | `#3A3833` | hairlines, image placeholders, tag borders           |
-| `--band`       | `#DCD2C3` | `#26241F` | full-width bands (Duas Leituras, companion block)    |
-| `--accent`     | `#652F3B` | `#D9A9B2` | kickers, links, notes, spoiler, active nav           |
-| `--accent-ink` | `#F4F0E8` | `#1C1B19` | text on an accent fill (tags, avatar)                |
-| `--highlight`  | `#DCD2C3` | `#4A2A31` | highlighted passage band                             |
-| `--inverse-bg` | `#252522` | `#ECE6DA` | Instagram band, top strip, typographic cover         |
-| `--inverse-fg` | `#F4F0E8` | `#1C1B19` | text on inverse                                      |
+| Token            | Light         | Dark      | Use                                                  |
+| ---------------- | ------------- | --------- | ---------------------------------------------------- |
+| `--bg`           | `#F4F0E8`     | `#1C1B19` | page background (paper)                              |
+| `--fg`           | `#252522`     | `#ECE6DA` | primary text, rules, primary button                  |
+| `--fg-soft`      | `#3A3935`     | `#CFC8BB` | excerpts, standfirst, secondary body text            |
+| `--muted`        | `#6A665F`     | `#A39D92` | metadata, captions, small labels (≥ 4.5:1)           |
+| `--muted-lg`     | `#77736D`     | `#8F897E` | large text or decoration only (fails at small sizes) |
+| `--line`         | `#DCD2C3`     | `#3A3833` | hairlines, image placeholders, tag borders           |
+| `--band`         | `#DCD2C3`     | `#26241F` | full-width bands (Duas Leituras, companion block)    |
+| `--accent`       | `#652F3B`     | `#D9A9B2` | kickers, links, notes, spoiler, active nav           |
+| `--accent-ink`   | `#F4F0E8`     | `#1C1B19` | text on an accent fill (tags, avatar)                |
+| `--highlight`    | `#DCD2C3`     | `#4A2A31` | highlighted passage band                             |
+| `--inverse-bg`   | `#252522`     | `#ECE6DA` | Instagram band, top strip                            |
+| `--inverse-fg`   | `#F4F0E8`     | `#1C1B19` | text on inverse                                      |
+| `--cover-bg`     | `#252522`     | `#2A2723` | typographic fallback cover surface                   |
+| `--cover-fg`     | `#F4F0E8`     | `#ECE6DA` | title on the typographic cover                       |
+| `--cover-kicker` | `#D9A9B2`     | `#D9A9B2` | kicker on the typographic cover                      |
+| `--cover-border` | `transparent` | `#3A3833` | 1px outline of the typographic cover (dark only)     |
 
 Contrast checked: fg on bg 14:1, accent on bg 9.6:1, muted on bg 5.0:1 (light);
-muted 6.3:1, accent 8.4:1 (dark). Keep every text pair at or above 4.5:1.
+muted 6.3:1, accent 8.4:1 (dark). Typographic cover: title 13.5:1 (light) and 12.0:1 (dark),
+kicker 7.5:1 (light) and 7.3:1 (dark). Keep every text pair at or above 4.5:1.
 
 ## 3. Typography
 
@@ -89,8 +94,11 @@ Drop cap: first paragraph only, Display 92px (72 mobile), accent color, 3 lines.
   book covers 2:3 at natural proportion (never stretched into a store-like grid), Duas Leituras
   shared cover 3:4.
 - Placeholder: `--line` fill with a small uppercase caption. Never stock photos.
-- **Typographic fallback cover** (no licensed image): `--inverse-bg` fill, work title in
-  Display italic (`--inverse-fg`), optional kicker in accent-light. Same ratios as images.
+- **Typographic fallback cover** (no licensed image): `--cover-bg` fill, work title in
+  Display italic (`--cover-fg`), optional kicker in `--cover-kicker`, 1px `--cover-border`
+  outline. Same ratios as images. It uses only the `--cover-*` tokens. In the dark theme it does
+  **not** invert into a light block, which would glare and read as a missing image: it stays a
+  dark surface, one step above `--band`, outlined by the hairline (decision of 2026-11-20).
 - Every image: pt-BR alt, credit/licence in caption or credits page.
 
 ## 6. Components
