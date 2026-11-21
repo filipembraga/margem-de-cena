@@ -2,9 +2,8 @@ import { notFound } from 'next/navigation';
 
 import { OPEN_GRAPH_IMAGE_SIZE } from '@/components/og/OpenGraphCard';
 import { renderOpenGraphImage } from '@/components/og/render-open-graph-image';
-import { getPerspectiveAuthorNames } from '@/components/two-perspectives/two-perspectives-labels';
+import { describeTwoPerspectivesShareCard } from '@/components/og/share-card-content';
 import { getAllTwoPerspectives, getTwoPerspectives } from '@/content';
-import { getCategoryDefinition } from '@/lib/categories';
 
 /** A Duas Leituras share card: the work's title and the two authors who read it. */
 
@@ -27,10 +26,5 @@ export default async function TwoPerspectivesOpenGraphImage({ params }: TwoPersp
     notFound();
   }
 
-  return renderOpenGraphImage({
-    kicker: `Duas Leituras · ${getCategoryDefinition(entry.work.category).pluralLabel}`,
-    title: entry.work.title,
-    footer: `Duas leituras independentes, por ${getPerspectiveAuthorNames(entry)}`,
-    isTitleItalic: true,
-  });
+  return renderOpenGraphImage(describeTwoPerspectivesShareCard(entry));
 }
