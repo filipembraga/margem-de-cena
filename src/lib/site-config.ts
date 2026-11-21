@@ -20,7 +20,10 @@ export type SiteConfig = {
   coverageLine: string;
   /** Placeholder until the authors provide a contact address. */
   contactEmail: string | null;
-  /** Publication's own Instagram handle, without "@". Hidden while not set. */
+  /**
+   * Publication's own Instagram handle, without "@". While it is not set, the header has no
+   * Instagram link and the home page invites readers to follow the authors instead.
+   */
   instagramHandle: string | null;
 };
 
