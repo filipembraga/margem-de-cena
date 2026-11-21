@@ -37,6 +37,8 @@ jobs:
       - run: pnpm test
       - name: Reject committed drafts
         run: pnpm check:drafts
+      - name: List texts still to fill in
+        run: pnpm check:placeholders
       - name: Lint commit messages
         if: github.event_name == 'pull_request'
         run: >

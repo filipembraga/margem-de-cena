@@ -21,6 +21,7 @@
     "test:e2e": "playwright test",
     "check": "pnpm typecheck && pnpm lint && pnpm test && pnpm check:drafts",
     "check:drafts": "node scripts/check-no-drafts.mjs",
+    "check:placeholders": "node scripts/list-placeholders.mjs",
     "verify:production-build": "node scripts/verify-production-build.mjs",
     "prepare": "husky"
   },

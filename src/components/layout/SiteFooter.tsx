@@ -6,7 +6,7 @@ import { footerNavigation, siteConfig, withoutEmptySections } from '@/lib/site-c
 import { Wordmark } from './Wordmark';
 
 /** Visible placeholder until the authors provide a contact address. */
-const CONTACT_EMAIL_PLACEHOLDER = '[contato@dominio]';
+const CONTACT_EMAIL_PLACEHOLDER = '[A PREENCHER: e-mail]';
 
 export async function SiteFooter() {
   const currentYear = new Date().getFullYear();
